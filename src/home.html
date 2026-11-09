@@ -147,6 +147,17 @@
   .switch{text-align:center;font-size:14px;color:var(--ink-2);margin-top:14px}
   .switch button{border:0;background:none;font-weight:700;text-decoration:underline;padding:0}
   .note{font-size:12px;color:var(--ink-3);text-align:center;margin-top:12px}
+  .check{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.45;color:var(--ink-2);margin:2px 0 10px;cursor:pointer}
+  .check input{width:18px;height:18px;margin:1px 0 0;accent-color:#111;flex:0 0 auto}
+  .check a{color:var(--ink);font-weight:500}
+  .linkbtn{border:0;background:none;padding:0;font-size:13.5px;color:var(--ink-2);text-decoration:underline;text-underline-offset:3px}
+  .btn[disabled]{opacity:.55;pointer-events:none}
+  .menu label{display:flex;gap:10px;align-items:center;padding:10px;border-radius:8px;font-size:14px;cursor:pointer}
+  .menu label:hover{background:var(--soft)}
+  .menu label input{accent-color:#111;width:16px;height:16px}
+  .menu hr{border:0;border-top:1px solid var(--line);margin:4px 0}
+  .menu .danger{color:#c62828}
+  footer a{text-decoration:none}footer a:hover{text-decoration:underline}
   .mini-prev{display:flex;height:44px;border-radius:10px;overflow:hidden;margin-bottom:18px}
   .mini-prev span{flex:1}
 
@@ -273,7 +284,7 @@
 <footer>
   <div class="wrap">
     <img src="/assets/logo.png" alt="JANAPAINT">
-    <span>© <span id="yr"></span> JANAPAINT · janapaint.com</span>
+    <span><a href="/privacidad/">Política de privacidad</a> · © <span id="yr"></span> JANAPAINT</span>
   </div>
 </footer>
 
@@ -299,12 +310,54 @@
     <p id="authSub">Accede para guardar hasta 5 paletas.</p>
     <form id="authForm" novalidate>
       <label class="field"><span>Correo electrónico</span><input type="email" id="email" autocomplete="email" required></label>
-      <label class="field"><span>Contraseña</span><input type="password" id="pass" autocomplete="current-password" minlength="6" required></label>
+      <label class="field"><span>Contraseña</span><input type="password" id="pass" autocomplete="current-password" minlength="8" required></label>
+      <div id="signupExtras" hidden>
+        <label class="check"><input type="checkbox" id="privacyChk"> <span>He leído y acepto la <a href="/privacidad/" target="_blank" rel="noopener">política de privacidad</a>.</span></label>
+        <label class="check"><input type="checkbox" id="mkChk"> <span>Quiero recibir por email novedades y actualizaciones de JANAPAINT (opcional).</span></label>
+      </div>
       <div class="err" id="authErr"></div>
       <button class="btn primary" style="width:100%" id="authSubmit" type="submit">Entrar</button>
     </form>
+    <div class="switch" id="forgotRow"><button class="linkbtn" id="forgotBtn" type="button">¿Has olvidado tu contraseña?</button></div>
     <div class="switch"><span id="swText">¿Aún no tienes cuenta?</span> <button id="swBtn" type="button">Crear cuenta</button></div>
     <p class="note">El inicio de sesión es opcional.</p>
+  </div>
+</div>
+
+<!-- Info -->
+<div class="overlay" id="infoDlg" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+  <div class="dialog">
+    <button class="x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3 id="infoTitle"></h3>
+    <p id="infoText"></p>
+    <button class="btn primary" style="width:100%" data-close>Entendido</button>
+  </div>
+</div>
+
+<!-- New password (after reset link) -->
+<div class="overlay" id="resetDlg" role="dialog" aria-modal="true" aria-labelledby="resetTitle">
+  <div class="dialog">
+    <h3 id="resetTitle">Nueva contraseña</h3>
+    <p>Escribe tu nueva contraseña.</p>
+    <form id="resetForm" novalidate>
+      <label class="field"><span>Nueva contraseña</span><input type="password" id="newPass" autocomplete="new-password" minlength="8" required></label>
+      <div class="err" id="resetErr"></div>
+      <button class="btn primary" style="width:100%" type="submit" id="resetSubmit">Guardar contraseña</button>
+    </form>
+  </div>
+</div>
+
+<!-- Delete account -->
+<div class="overlay" id="deleteDlg" role="dialog" aria-modal="true" aria-labelledby="delTitle">
+  <div class="dialog">
+    <button class="x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3 id="delTitle">¿Borrar tu cuenta?</h3>
+    <p>Se borrarán tu cuenta y todas tus paletas guardadas. No se puede deshacer.</p>
+    <div class="err" id="delErr"></div>
+    <div class="stack">
+      <button class="btn primary" id="delConfirm" style="background:#c62828;border-color:#c62828">Sí, borrar mi cuenta</button>
+      <button class="btn ghost" data-close>Cancelar</button>
+    </div>
   </div>
 </div>
 
@@ -320,6 +373,8 @@
 
 <div class="toast" id="toast" role="status"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>window.JP_CFG = { url: "{{SUPABASE_URL}}", key: "{{SUPABASE_KEY}}" };</script>
 <script>
 (() => {
   "use strict";
@@ -417,15 +472,18 @@
   /* ---------- State ---------- */
   let current = null;
   const locks = [null,null,null,null,null];
-  let session = store.get("jp_session", null); // email
-  let guestSaved = []; // palettes saved without login (this visit only)
-
-  const users = () => store.get("jp_users", {});
-  function getSaved(){ if(session){ const u = users()[session]; return u ? u.palettes : []; } return guestSaved; }
-  function setSaved(list){
-    if(session){ const all = users(); if(all[session]){ all[session].palettes = list; store.set("jp_users", all); } }
-    else guestSaved = list;
-  }
+  let user = null;        // { id, email } when signed in (Supabase)
+  let guestSaved = [];     // palettes saved without login (this visit only)
+  let cloudSaved = [];     // palettes from the database
+  let marketing = false;
+  const CFG = window.JP_CFG || {};
+  let sb = null;
+  try{
+    if(window.supabase && CFG.url && CFG.key && !CFG.url.startsWith("{{"))
+      sb = window.supabase.createClient(CFG.url, CFG.key, { auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } });
+  }catch(e){ sb = null; }
+  const getSaved = () => user ? cloudSaved : guestSaved;
+  const escH = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
   /* ---------- Icons ---------- */
   const IC = {
@@ -490,17 +548,34 @@
 
   /* ---------- Save flow ---------- */
   let pendingSave = null;
-  function savePalette(p){
+  async function savePalette(p, quiet){
     const list = getSaved();
     const sig = p.colors.join("");
-    if(list.some(x => x.colors.join("") === sig)){ toast("Esta paleta ya está guardada"); return; }
-    if(list.length >= MAX){ open("#fullDlg"); return; }
-    list.unshift({ id: Date.now().toString(36), colors: [...p.colors], scheme: p.scheme, mood: p.mood, date: new Date().toISOString() });
-    setSaved(list); renderSaved();
-    toast(session ? "Paleta guardada en tu cuenta" : "Paleta guardada en esta visita");
+    if(list.some(x => x.colors.join("") === sig)){ if(!quiet) toast("Esta paleta ya está guardada"); return false; }
+    if(list.length >= MAX){ if(!quiet) open("#fullDlg"); return false; }
+    if(user){
+      const { data, error } = await sb.from("palettes")
+        .insert({ colors: [...p.colors], scheme: p.scheme, mood: p.mood })
+        .select("id, created_at").single();
+      if(error){
+        if(quiet) return false;
+        if((error.message||"").includes("MAX_PALETTES")) open("#fullDlg");
+        else if(error.code === "23505") toast("Esta paleta ya está guardada");
+        else toast("No se pudo guardar. Inténtalo de nuevo.");
+        return false;
+      }
+      cloudSaved.unshift({ id:data.id, colors:[...p.colors], scheme:p.scheme, mood:p.mood, date:data.created_at });
+      renderSaved(); if(!quiet) toast("Paleta guardada en tu cuenta");
+      return true;
+    }
+    guestSaved.unshift({ id: Date.now().toString(36), colors: [...p.colors], scheme: p.scheme, mood: p.mood, date: new Date().toISOString() });
+    renderSaved(); if(!quiet) toast("Paleta guardada en esta visita");
+    return true;
   }
-  $("#saveBtn").addEventListener("click", () => {
-    if(session){ savePalette(current); return; }
+  let saving = false;
+  $("#saveBtn").addEventListener("click", async () => {
+    if(user){ if(saving) return; saving = true; $("#saveBtn").disabled = true;
+      try{ await savePalette(current); } finally { saving = false; $("#saveBtn").disabled = false; } return; }
     pendingSave = { ...current, colors:[...current.colors] };
     $("#spPrev").innerHTML = current.colors.map(c => `<span style="background:${c}"></span>`).join("");
     open("#savePrompt");
@@ -523,7 +598,7 @@
       <div class="card" data-id="${p.id}">
         <div class="mini" data-a="load" title="Abrir en el generador">${p.colors.map(c=>`<span style="background:${c}" title="${c}"></span>`).join("")}</div>
         <div class="card-meta">
-          <span>${new Date(p.date).toLocaleDateString("es-ES",{day:"numeric",month:"short"})} · ${p.scheme}</span>
+          <span>${new Date(p.date).toLocaleDateString("es-ES",{day:"numeric",month:"short"})}${p.scheme ? " · "+escH(p.scheme) : ""}</span>
           <div class="card-acts">
             <button class="ico" data-a="load" aria-label="Abrir en el generador" title="Abrir">${IC.load}</button>
             <button class="ico" data-a="pdf" aria-label="Descargar PDF" title="PDF">${IC.down}</button>
@@ -532,11 +607,19 @@
         </div>
       </div>`).join("");
   }
-  track.addEventListener("click", e => {
+  track.addEventListener("click", async e => {
     const b = e.target.closest("[data-a]"); if(!b) return;
     const id = b.closest(".card").dataset.id, list = getSaved(), p = list.find(x => x.id === id);
     if(!p) return;
-    if(b.dataset.a === "del"){ setSaved(list.filter(x => x.id !== id)); renderSaved(); toast("Paleta borrada"); }
+    if(b.dataset.a === "del"){
+      if(user){
+        b.disabled = true;
+        const { error } = await sb.from("palettes").delete().eq("id", id);
+        if(error){ b.disabled = false; toast("No se pudo borrar. Inténtalo de nuevo."); return; }
+        cloudSaved = cloudSaved.filter(x => x.id !== id);
+      } else guestSaved = guestSaved.filter(x => x.id !== id);
+      renderSaved(); toast("Paleta borrada");
+    }
     else if(b.dataset.a === "pdf") downloadPDF(p);
     else { current = { colors:[...p.colors], scheme:p.scheme, mood:p.mood }; locks.fill(null); renderPalette(); $("#inicio").scrollIntoView(); }
   });
@@ -544,15 +627,20 @@
   $("#prev").addEventListener("click", () => track.scrollBy({left:-step(), behavior:"smooth"}));
   $("#next").addEventListener("click", () => track.scrollBy({left: step(), behavior:"smooth"}));
 
-  /* ---------- Auth (optional) ----------
-     Prototype: accounts live in this browser (localStorage).
-     For production, swap these 3 functions for a real backend (e.g. Supabase Auth + a "palettes" table). */
+  /* ---------- Auth (Supabase: email + password) ---------- */
   let authMode = "login";
-  async function hash(s){
-    try{ const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("janapaint:"+s));
-      return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join(""); }
-    catch(e){ let h=0; for(const c of s) h=(h*31+c.charCodeAt(0))|0; return "x"+h; }
-  }
+  const authErrMsg = err => {
+    const m = (err && (err.message || err.error_description)) || "";
+    if(/invalid login credentials/i.test(m)) return "Correo o contraseña incorrectos.";
+    if(/email not confirmed/i.test(m)) return "Confirma tu correo antes de entrar (revisa tu bandeja de entrada).";
+    if(/already registered|already exists/i.test(m)) return "Ya existe una cuenta con ese correo. Inicia sesión.";
+    if(/rate limit|too many|security purposes/i.test(m)) return "Demasiados intentos. Espera un minuto y vuelve a probar.";
+    if(/password/i.test(m) && /(short|weak|least|characters)/i.test(m)) return "La contraseña es demasiado débil. Usa al menos 8 caracteres.";
+    if(/fetch|network/i.test(m)) return "No hay conexión. Revisa internet y vuelve a intentarlo.";
+    return "Algo ha fallado. Inténtalo de nuevo.";
+  };
+  const info = (title, text) => { $("#infoTitle").textContent = title; $("#infoText").textContent = text; open("#infoDlg"); };
+
   function openAuth(mode){
     authMode = mode; $("#authErr").textContent = "";
     const login = mode === "login";
@@ -562,46 +650,141 @@
     $("#swText").textContent = login ? "¿Aún no tienes cuenta?" : "¿Ya tienes cuenta?";
     $("#swBtn").textContent = login ? "Crear cuenta" : "Iniciar sesión";
     $("#pass").setAttribute("autocomplete", login ? "current-password" : "new-password");
+    $("#signupExtras").hidden = login; $("#forgotRow").hidden = !login;
     open("#auth"); setTimeout(() => $("#email").focus(), 40);
   }
   $("#swBtn").addEventListener("click", () => openAuth(authMode === "login" ? "signup" : "login"));
+
+  async function loadCloud(){
+    if(!sb || !user) return;
+    const { data, error } = await sb.from("palettes").select("id, colors, scheme, mood, created_at").order("created_at", { ascending:false });
+    if(error){ toast("No se pudieron cargar tus paletas"); return; }
+    cloudSaved = data.map(r => ({ id:r.id, colors:r.colors, scheme:r.scheme || "", mood:r.mood || "", date:r.created_at }));
+    renderSaved();
+  }
+  async function loadProfile(){
+    if(!sb || !user) return;
+    const { data } = await sb.from("profiles").select("marketing_opt_in").eq("id", user.id).maybeSingle();
+    marketing = !!(data && data.marketing_opt_in); renderUser();
+  }
+  function setUser(u){
+    const was = user && user.id;
+    user = u ? { id:u.id, email:u.email } : null;
+    if(!user){ cloudSaved = []; marketing = false; }
+    renderUser(); renderSaved();
+    return was !== (user && user.id);
+  }
+  // After an explicit sign-in: load account, move this visit's palettes into it, then the pending save.
+  async function afterLogin(kind){
+    await loadCloud(); loadProfile();
+    const guests = guestSaved.slice().reverse(); guestSaved = [];
+    for(const p of guests) await savePalette(p, true);
+    if(pendingSave){ const p = pendingSave; pendingSave = null; await savePalette(p); }
+    else toast(kind === "signup" ? "Cuenta creada" : "Sesión iniciada");
+  }
+
   $("#authForm").addEventListener("submit", async e => {
     e.preventDefault();
-    const email = $("#email").value.trim().toLowerCase(), pass = $("#pass").value, err = $("#authErr");
+    const email = $("#email").value.trim().toLowerCase(), pass = $("#pass").value, err = $("#authErr"), btn = $("#authSubmit");
+    err.textContent = "";
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent = "Escribe un correo válido."; return; }
-    if(pass.length < 6){ err.textContent = "La contraseña necesita al menos 6 caracteres."; return; }
-    const all = users(), h = await hash(pass);
-    if(authMode === "signup"){
-      if(all[email]){ err.textContent = "Ya existe una cuenta con ese correo. Inicia sesión."; return; }
-      all[email] = { hash:h, palettes:[], created:new Date().toISOString() };
-    } else {
-      if(!all[email]){ err.textContent = "No encontramos esa cuenta. ¿Quieres crearla?"; return; }
-      if(all[email].hash !== h){ err.textContent = "Contraseña incorrecta."; return; }
-    }
-    // merge palettes saved during this visit
-    const merged = [...guestSaved, ...all[email].palettes].filter((p,i,arr) => arr.findIndex(q => q.colors.join("")===p.colors.join(""))===i).slice(0,MAX);
-    all[email].palettes = merged;
-    if(!store.set("jp_users", all)){ err.textContent = "Tu navegador no permite guardar datos. Prueba otro navegador."; return; }
-    session = email; store.set("jp_session", email); guestSaved = [];
-    close("#auth"); $("#authForm").reset(); renderUser(); renderSaved();
-    if(pendingSave){ savePalette(pendingSave); pendingSave = null; }
-    else toast(authMode === "signup" ? "Cuenta creada" : "Sesión iniciada");
+    if(pass.length < 8){ err.textContent = "La contraseña necesita al menos 8 caracteres."; return; }
+    if(authMode === "signup" && !$("#privacyChk").checked){ err.textContent = "Para crear la cuenta tienes que aceptar la política de privacidad."; return; }
+    if(!sb){ err.textContent = "No se pudo conectar. Recarga la página y vuelve a intentarlo."; return; }
+    btn.disabled = true;
+    try{
+      if(authMode === "signup"){
+        const { data, error } = await sb.auth.signUp({ email, password: pass, options: {
+          emailRedirectTo: location.origin + "/",
+          data: { privacy_accepted: true, marketing_opt_in: $("#mkChk").checked } } });
+        if(error){ err.textContent = authErrMsg(error); return; }
+        if(data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0){ err.textContent = "Ya existe una cuenta con ese correo. Inicia sesión."; return; }
+        if(!data.session){
+          close("#auth"); $("#authForm").reset();
+          info("Revisa tu correo", `Te hemos enviado un enlace a ${email} para confirmar tu cuenta. Después podrás entrar y guardar tus paletas.`);
+          return;
+        }
+        setUser(data.session.user); close("#auth"); $("#authForm").reset(); await afterLogin("signup");
+      } else {
+        const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+        if(error){ err.textContent = authErrMsg(error); return; }
+        setUser(data.user); close("#auth"); $("#authForm").reset(); await afterLogin("login");
+      }
+    } catch(ex){ err.textContent = authErrMsg(ex); }
+    finally { btn.disabled = false; }
   });
+
+  $("#forgotBtn").addEventListener("click", async () => {
+    const email = $("#email").value.trim().toLowerCase(), err = $("#authErr");
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent = "Escribe tu correo arriba y pulsa otra vez en «¿Has olvidado tu contraseña?»."; return; }
+    if(!sb){ err.textContent = "No se pudo conectar. Recarga la página."; return; }
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + "/" });
+    if(error){ err.textContent = authErrMsg(error); return; }
+    close("#auth");
+    info("Revisa tu correo", "Si existe una cuenta con ese correo, recibirás un enlace para crear una contraseña nueva.");
+  });
+
+  $("#resetForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const pass = $("#newPass").value, err = $("#resetErr");
+    if(pass.length < 8){ err.textContent = "La contraseña necesita al menos 8 caracteres."; return; }
+    $("#resetSubmit").disabled = true;
+    const { error } = await sb.auth.updateUser({ password: pass });
+    $("#resetSubmit").disabled = false;
+    if(error){ err.textContent = authErrMsg(error); return; }
+    close("#resetDlg"); $("#resetForm").reset(); toast("Contraseña actualizada");
+  });
+
+  $("#delConfirm").addEventListener("click", async () => {
+    const b = $("#delConfirm"); b.disabled = true; $("#delErr").textContent = "";
+    const { error } = await sb.rpc("delete_my_account");
+    b.disabled = false;
+    if(error){ $("#delErr").textContent = "No se pudo borrar la cuenta. Inténtalo de nuevo."; return; }
+    await sb.auth.signOut({ scope: "local" }).catch(() => {});
+    setUser(null); close("#deleteDlg"); toast("Tu cuenta se ha borrado");
+  });
+
   function renderUser(){
     const box = $("#userBox");
-    if(!session){ box.innerHTML = `<button class="btn small" id="loginBtn">Iniciar sesión</button>`; $("#loginBtn").onclick = () => openAuth("login"); return; }
-    box.innerHTML = `<button class="btn small" id="meBtn" aria-haspopup="true">${session.split("@")[0].slice(0,14)}</button>
-      <div class="menu" id="menu"><p>${session}</p><button id="outBtn">Cerrar sesión</button></div>`;
+    if(!user){ box.innerHTML = `<button class="btn small" id="loginBtn">Iniciar sesión</button>`; $("#loginBtn").onclick = () => openAuth("login"); return; }
+    box.innerHTML = `<button class="btn small" id="meBtn" aria-haspopup="true">${escH(user.email.split("@")[0].slice(0,14))}</button>
+      <div class="menu" id="menu">
+        <p>${escH(user.email)}</p>
+        <label><input type="checkbox" id="mkToggle" ${marketing ? "checked" : ""}> Recibir novedades por email</label>
+        <hr>
+        <button id="outBtn">Cerrar sesión</button>
+        <button id="delBtn" class="danger">Borrar mi cuenta</button>
+      </div>`;
     $("#meBtn").onclick = e => { e.stopPropagation(); $("#menu").classList.toggle("open"); };
-    $("#outBtn").onclick = () => { session = null; store.del("jp_session"); renderUser(); renderSaved(); toast("Sesión cerrada"); };
+    $("#menu").onclick = e => e.stopPropagation();
+    $("#mkToggle").onchange = async e => {
+      const v = e.target.checked;
+      const { error } = await sb.from("profiles").update({ marketing_opt_in: v, marketing_opt_in_at: v ? new Date().toISOString() : null }).eq("id", user.id);
+      if(error){ e.target.checked = !v; toast("No se pudo guardar el cambio"); return; }
+      marketing = v; toast(v ? "Recibirás novedades por email" : "Ya no recibirás novedades");
+    };
+    $("#outBtn").onclick = async () => { await sb.auth.signOut().catch(() => {}); setUser(null); toast("Sesión cerrada"); };
+    $("#delBtn").onclick = () => { $("#menu").classList.remove("open"); $("#delErr").textContent = ""; open("#deleteDlg"); };
   }
   document.addEventListener("click", () => $("#menu")?.classList.remove("open"));
+
+  // Session restore, email-confirmation links, password-reset links.
+  if(sb){
+    sb.auth.onAuthStateChange((event, session) => {
+      if(event === "PASSWORD_RECOVERY"){ setTimeout(() => open("#resetDlg"), 0); }
+      if(event === "SIGNED_OUT"){ setUser(null); return; }
+      if(session && session.user && (!user || user.id !== session.user.id)){
+        setUser(session.user);
+        setTimeout(() => { loadCloud(); loadProfile(); }, 0); // never await Supabase inside this callback
+      }
+    });
+  }
 
   /* ---------- Overlays ---------- */
   function open(sel){ $(sel).classList.add("open"); document.body.style.overflow = "hidden"; }
   function close(sel){ $(sel).classList.remove("open"); if(!document.querySelector(".overlay.open")) document.body.style.overflow = ""; }
   document.querySelectorAll(".overlay").forEach(o => o.addEventListener("click", e => {
-    if(e.target === o || e.target.closest("[data-close]")){ close("#"+o.id); if(o.id==="savePrompt") pendingSave=null; }
+    if(e.target === o || e.target.closest("[data-close]")){ close("#"+o.id); if(o.id==="savePrompt" || o.id==="auth") pendingSave=null; }
   }));
 
   /* ---------- Keyboard ---------- */

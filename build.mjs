@@ -126,7 +126,7 @@ const header = `<header><div class="wrap bar">
   <a class="brand" href="/" aria-label="JANAPAINT, inicio"><img src="/assets/logo.png" alt="JANAPAINT" width="640" height="291"></a>
   <nav><a class="navlink" href="/">Generador</a><a class="navlink" href="/blog/">Blog</a></nav>
 </div></header>`;
-const footer = `<footer><div class="wrap"><img src="/assets/logo.png" alt="JANAPAINT" width="640" height="291"><span>© ${new Date().getFullYear()} JANAPAINT · janapaint.com</span></div></footer>`;
+const footer = `<footer><div class="wrap"><img src="/assets/logo.png" alt="JANAPAINT" width="640" height="291"><span><a href="/privacidad/">Política de privacidad</a> · © ${new Date().getFullYear()} JANAPAINT</span></div></footer>`;
 const jsonld = o => JSON.stringify(o).replace(/</g, "\\u003c");
 
 function page({ title, description, canonical, ogImage, ogType = "website", body, ld, extraHead = "" }) {
@@ -166,6 +166,8 @@ copyDir(path.join(ROOT, "public"), DIST);
 // Home
 const home = fs.readFileSync(path.join(ROOT, "src/home.html"), "utf8")
   .replaceAll("{{SITE}}", SITE)
+  .replace("{{SUPABASE_URL}}", CFG.supabaseUrl || "")
+  .replace("{{SUPABASE_KEY}}", CFG.supabaseKey || "")
   .replace("{{HEAD_COMMON}}", HEAD_COMMON)
   .replace("{{JSONLD_HOME}}", jsonld({
     "@context": "https://schema.org",
@@ -239,9 +241,33 @@ ${related.length ? `<section class="wrap related"><h2 class="all-title">Sigue le
   }));
 });
 
+// Static pages (/pages/*.md → /<slug>/)
+const PAGES = [];
+for (const f of fs.readdirSync(path.join(ROOT, "pages")).filter(f => f.endsWith(".md"))) {
+  const src = fs.readFileSync(path.join(ROOT, "pages", f), "utf8");
+  const m = src.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
+  const meta = Object.fromEntries(m[1].split(/\r?\n/).map(l => [l.slice(0, l.indexOf(":")).trim(), l.slice(l.indexOf(":") + 1).trim()]));
+  const slug = path.basename(f, ".md");
+  const fill = s => s.replace(/\{\{(\w+)\}\}/g, (x, k) => CFG[k] || `[${k} pendiente]`);
+  const url = `${SITE}/${slug}/`;
+  PAGES.push({ url, lastmod: meta.updated || TODAY });
+  write(path.join(DIST, slug, "index.html"), page({
+    title: `${meta.title} | JANAPAINT`, description: meta.description, canonical: url, ogImage: `${SITE}/assets/og.png`,
+    ld: { "@context": "https://schema.org", "@type": "WebPage", name: meta.title, url, inLanguage: "es" },
+    body: `<article class="post-page"><div class="wrap narrow" style="padding-top:40px;padding-bottom:60px">
+  <h1>${esc(meta.title)}</h1>
+  <p class="by">Última actualización: ${fmtDate(meta.updated || TODAY)}</p>
+  <div class="content">
+${markdown(fill(m[2]))}
+  </div>
+</div></article>`,
+  }));
+}
+
 // Sitemap, robots, RSS
 const urls = [{ loc: SITE + "/", lastmod: posts[0]?.date || TODAY }, { loc: `${SITE}/blog/`, lastmod: posts[0]?.date || TODAY },
-  ...posts.map(p => ({ loc: `${SITE}/blog/${p.slug}/`, lastmod: p.updated || p.date }))];
+  ...posts.map(p => ({ loc: `${SITE}/blog/${p.slug}/`, lastmod: p.updated || p.date })),
+  ...PAGES.map(p => ({ loc: p.url, lastmod: p.lastmod }))];
 write(path.join(DIST, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(u => `  <url><loc>${u.loc}</loc><lastmod>${u.lastmod}</lastmod></url>`).join("\n")}
