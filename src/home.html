@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generador de paletas de colores gratis | JANAPAINT</title>
+<meta name="description" content="Genera paletas de colores armónicas y aleatorias en un clic. Copia los códigos HEX y RGB, guarda tus favoritas y descárgalas en PDF. Gratis.">
+<link rel="canonical" href="{{SITE}}/">
+{{HEAD_COMMON}}
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{SITE}}/">
+<meta property="og:title" content="JANAPAINT — Encuentra los colores perfectos">
+<meta property="og:description" content="Paletas de colores armónicas y aleatorias en un clic. Guárdalas y descárgalas en PDF.">
+<meta property="og:image" content="{{SITE}}/assets/og.png">
+<link rel="alternate" type="application/rss+xml" title="Blog de JANAPAINT" href="{{SITE}}/blog/feed.xml">
+<script type="application/ld+json">{{JSONLD_HOME}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0d0d0d; --ink-2:#4a4a4a; --ink-3:#8a8a8a;
+    --line:#ececec; --soft:#f6f6f4; --bg:#ffffff;
+    --r:16px;
+    --head:"Fredoka", ui-rounded, system-ui, sans-serif;
+    --body:"DM Sans", system-ui, -apple-system, sans-serif;
+    --mono:"DM Mono", ui-monospace, SFMono-Regular, monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  button{font:inherit;color:inherit;cursor:pointer}
+  a{color:inherit}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+
+  /* Header */
+  header{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.92);backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;align-items:center;justify-content:space-between;height:72px;gap:16px}
+  .brand img{height:54px;width:auto;display:block}
+  nav{display:flex;align-items:center;gap:6px}
+  .navlink{padding:9px 14px;border-radius:999px;text-decoration:none;font-weight:500;color:var(--ink-2)}
+  .navlink:hover{background:var(--soft);color:var(--ink)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:46px;padding:0 20px;border-radius:999px;border:1.5px solid var(--ink);background:#fff;font-weight:700;font-size:15px;transition:transform .12s ease, background .15s ease}
+  .btn:hover{background:var(--soft)}
+  .btn:active{transform:scale(.97)}
+  .btn.primary{background:var(--ink);color:#fff}
+  .btn.primary:hover{background:#2a2a2a}
+  .btn.small{height:38px;padding:0 16px;font-size:14px}
+  .btn.ghost{border-color:var(--line)}
+  .btn svg{width:18px;height:18px}
+  .user{position:relative}
+  .menu{position:absolute;right:0;top:46px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.08);padding:6px;min-width:200px;display:none}
+  .menu.open{display:block}
+  .menu p{margin:6px 10px 8px;font-size:13px;color:var(--ink-3);word-break:break-all}
+  .menu button{width:100%;text-align:left;border:0;background:none;padding:10px;border-radius:8px}
+  .menu button:hover{background:var(--soft)}
+
+  /* Hero */
+  .hero{padding:56px 0 20px;text-align:center}
+  h1,h2,h3{font-family:var(--head);font-weight:600;letter-spacing:-.01em;margin:0}
+  h1{font-size:clamp(36px,5.6vw,64px);line-height:1.05}
+  .lede{color:var(--ink-2);font-size:18px;max-width:560px;margin:14px auto 0}
+
+  /* Palette */
+  .gen{padding:28px 0 12px}
+  .divider{border:0;height:1px;background:#e2e2e2;max-width:720px;margin:36px auto 8px}
+  .meta{display:flex;justify-content:center;gap:8px;margin-bottom:16px;min-height:30px}
+  .chip{font-size:13px;font-weight:500;padding:5px 12px;border-radius:999px;background:var(--soft);color:var(--ink-2)}
+  .palette{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+  .sw{display:flex;flex-direction:column;min-width:0}
+  .sw-color{position:relative;height:clamp(320px,56vh,520px);border-radius:var(--r);transition:background-color .28s ease;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+  .sw-tools{position:absolute;left:0;right:0;bottom:12px;display:flex;justify-content:center;gap:8px;opacity:0;transition:opacity .15s}
+  .sw:hover .sw-tools,.sw.locked .sw-tools,.sw:focus-within .sw-tools{opacity:1}
+  .tool{width:38px;height:38px;border-radius:50%;border:0;display:grid;place-items:center;background:rgba(255,255,255,.88);color:#111;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+  .tool svg{width:18px;height:18px}
+  .tool.on{background:#111;color:#fff}
+  .sw-label{padding:12px 4px 0;text-align:left}
+  .hex{font-family:var(--mono);font-weight:500;font-size:19px;letter-spacing:.02em;background:none;border:0;padding:0;text-align:left}
+  .hex:hover{text-decoration:underline;text-underline-offset:3px}
+  .rgb{font-family:var(--mono);font-size:12.5px;color:var(--ink-3)}
+  .actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:30px}
+  .btn.gen-btn{height:56px;padding:0 40px;font-size:17px}
+  .hint{text-align:center;color:var(--ink-3);font-size:13.5px;margin-top:12px}
+  kbd{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;color:var(--ink-2)}
+
+  /* Saved */
+  section{scroll-margin-top:80px}
+  .saved{padding:56px 0 24px}
+  .sec-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:18px}
+  .sec-head h2{font-size:30px}
+  .sec-head p{margin:4px 0 0;color:var(--ink-2)}
+  .count{font-family:var(--mono);font-size:14px;color:var(--ink-2)}
+  .arrows{display:flex;gap:8px}
+  .arrow{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--line);background:#fff;display:grid;place-items:center}
+  .arrow:hover{border-color:var(--ink)}
+  .arrow svg{width:18px;height:18px}
+  .track{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 14px;scrollbar-width:thin}
+  .card{flex:0 0 262px;width:262px;min-width:0;max-width:262px;scroll-snap-align:start;border:1px solid var(--line);border-radius:14px;padding:10px;background:#fff}
+  .mini{display:flex;height:92px;border-radius:9px;overflow:hidden;cursor:pointer}
+  .mini span{flex:1}
+  .card-meta span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .card-meta{gap:6px;display:flex;min-width:0;justify-content:space-between;align-items:center;margin-top:10px;font-size:13px;color:var(--ink-3)}
+  .card-acts{display:flex;gap:4px}
+  .ico{width:32px;height:32px;border-radius:8px;border:0;background:none;display:grid;place-items:center;color:var(--ink-2)}
+  .ico:hover{background:var(--soft);color:var(--ink)}
+  .ico svg{width:17px;height:17px}
+  .empty{border:1.5px dashed var(--line);border-radius:14px;padding:30px;text-align:center;color:var(--ink-3)}
+  .slots{display:flex;gap:6px;margin-top:4px}
+  .slot{width:22px;height:6px;border-radius:3px;background:var(--line)}
+  .slot.full{background:var(--ink)}
+
+  /* Blog */
+  .blog{padding:72px 0 40px;border-top:1px solid var(--line);margin-top:48px}
+  .featured{display:grid;grid-template-columns:1.1fr 1fr;gap:32px;align-items:center;border:1px solid var(--line);border-radius:20px;padding:18px;cursor:pointer;transition:box-shadow .2s}
+  .featured:hover,.post:hover{box-shadow:0 12px 36px rgba(0,0,0,.07)}
+  .cover{display:flex;border-radius:12px;overflow:hidden;aspect-ratio:16/10}
+  .cover span{flex:1}
+  .tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+  .featured h3{font-size:clamp(26px,3vw,36px);line-height:1.12;margin:8px 0 12px}
+  .featured p{color:var(--ink-2);margin:0 0 14px}
+  .by{font-size:13.5px;color:var(--ink-3)}
+  .latest{font-size:12px;font-weight:700;background:var(--ink);color:#fff;border-radius:999px;padding:3px 10px;margin-right:8px;letter-spacing:.04em}
+  .all-title{font-size:22px;margin:44px 0 16px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .post{border:1px solid var(--line);border-radius:16px;padding:12px 12px 18px;cursor:pointer;transition:box-shadow .2s;background:#fff;text-align:left}
+  a.post,a.featured{display:block;text-decoration:none;color:inherit}
+  a.featured{display:grid}
+  .post .cover{aspect-ratio:16/9}
+  .post h3{font-size:20px;line-height:1.2;margin:12px 4px 8px}
+  .post p{color:var(--ink-2);font-size:14.5px;margin:0 4px 10px}
+  .post .tag,.post .by{margin:0 4px}
+
+  /* Overlays */
+  .overlay{position:fixed;inset:0;background:rgba(10,10,10,.42);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .overlay.open{display:flex}
+  .dialog{background:#fff;border-radius:20px;width:100%;max-width:420px;padding:28px;position:relative;box-shadow:0 30px 80px rgba(0,0,0,.25)}
+  .dialog h3{font-size:24px;margin-bottom:6px}
+  .dialog p{color:var(--ink-2);margin:0 0 18px}
+  .x{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;border:0;background:var(--soft);display:grid;place-items:center}
+  .x svg{width:16px;height:16px}
+  .field{display:block;margin-bottom:12px}
+  .field span{display:block;font-size:13px;font-weight:500;margin-bottom:5px}
+  .field input{width:100%;height:46px;border:1.5px solid var(--line);border-radius:12px;padding:0 14px;font:inherit}
+  .field input:focus{outline:none;border-color:var(--ink)}
+  .err{color:#c62828;font-size:13.5px;min-height:20px;margin-bottom:6px}
+  .stack{display:flex;flex-direction:column;gap:10px}
+  .switch{text-align:center;font-size:14px;color:var(--ink-2);margin-top:14px}
+  .switch button{border:0;background:none;font-weight:700;text-decoration:underline;padding:0}
+  .note{font-size:12px;color:var(--ink-3);text-align:center;margin-top:12px}
+  .mini-prev{display:flex;height:44px;border-radius:10px;overflow:hidden;margin-bottom:18px}
+  .mini-prev span{flex:1}
+
+  .reader{background:#fff;border-radius:20px;width:100%;max-width:760px;max-height:92vh;overflow:auto;position:relative}
+  .reader .cover{aspect-ratio:auto;height:180px;border-radius:0}
+  .reader-body{padding:32px clamp(22px,5vw,56px) 48px}
+  .reader h2{font-size:clamp(28px,4vw,40px);line-height:1.1;margin:10px 0 10px}
+  .reader article{font-size:17.5px;line-height:1.7;color:#222}
+  .reader article h4{font-family:var(--head);font-weight:600;font-size:22px;margin:30px 0 6px;color:var(--ink)}
+  .reader article p{margin:0 0 16px}
+  .reader .x{background:rgba(255,255,255,.9)}
+  .codes{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+  .codes button{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 12px 5px 6px;font-family:var(--mono);font-size:13px}
+  .codes i{width:20px;height:20px;border-radius:50%;display:block}
+
+  .toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:999px;font-weight:500;font-size:14.5px;opacity:0;pointer-events:none;transition:all .22s ease;z-index:80}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+
+  footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--ink-3);font-size:14px}
+  footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  footer img{height:34px}
+
+  @media (max-width: 860px){
+    .grid{grid-template-columns:1fr 1fr}
+    .featured{grid-template-columns:1fr}
+  }
+  @media (max-width: 640px){
+    .wrap{padding:0 16px}
+    .brand img{height:40px}
+    .navlink{padding:8px 10px}
+    .hero{padding:36px 0 8px}
+    .palette{grid-template-columns:1fr;gap:8px}
+    .sw{flex-direction:row;align-items:center;gap:14px}
+    .sw-color{height:96px;flex:0 0 58%;border-radius:12px}
+    .sw-tools{opacity:1;bottom:auto;top:50%;transform:translateY(-50%);justify-content:flex-end;right:10px;left:auto}
+    .tool{width:34px;height:34px}
+    .sw-label{padding:0}
+    .hex{font-size:17px}
+    .grid{grid-template-columns:1fr}
+    .btn.gen-btn{width:100%}
+    .actions .btn:not(.gen-btn){flex:1}
+    .hide-sm{display:none}
+  }
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important;scroll-behavior:auto!important} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="/" aria-label="JANAPAINT, inicio"><img src="/assets/logo.png" alt="JANAPAINT"></a>
+    <nav>
+      <a class="navlink hide-sm" href="#inicio">Generador</a>
+      <a class="navlink hide-sm" href="#guardadas">Mis paletas</a>
+      <a class="navlink" href="/blog/">Blog</a>
+      <div class="user" id="userBox"></div>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section id="inicio" class="wrap">
+    <div class="hero">
+      <h1>Encuentra los colores perfectos</h1>
+      <p class="lede">Paletas armónicas y nuevas cada vez que pulsas. Guarda tus favoritas y descárgalas en PDF.</p>
+    </div>
+
+    <hr class="divider">
+
+    <div class="gen">
+      <div class="meta" id="meta"></div>
+      <div class="palette" id="palette" aria-live="polite"></div>
+      <div class="actions">
+        <button class="btn primary gen-btn" id="genBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+          Generar
+        </button>
+        <button class="btn" id="saveBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          Guardar
+        </button>
+        <button class="btn" id="pdfBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+          Descargar PDF
+        </button>
+      </div>
+      <p class="hint">Pulsa <kbd>espacio</kbd> para generar · haz clic en un código para copiarlo · usa el candado para fijar un color</p>
+    </div>
+  </section>
+
+  <section id="guardadas" class="saved"><div class="wrap">
+    <div class="sec-head">
+      <div>
+        <h2>Mis paletas</h2>
+        <div class="slots" id="slots" aria-hidden="true"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <span class="count" id="count">0/5</span>
+        <div class="arrows">
+          <button class="arrow" id="prev" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <button class="arrow" id="next" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></button>
+        </div>
+      </div>
+    </div>
+    <div class="track" id="track"></div>
+  </div></section>
+
+  <section id="blog" class="blog">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <h2><a href="/blog/" style="text-decoration:none">Blog</a></h2>
+          <p>Color para marcas, empresas, moda y la naturaleza.</p>
+        </div>
+      </div>
+      {{FEATURED}}
+      <h3 class="all-title">Últimos artículos</h3>
+      <div class="grid">{{POSTS}}</div>
+      <div style="text-align:center;margin-top:30px"><a class="btn" href="/blog/">Ver todos los artículos</a></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <img src="/assets/logo.png" alt="JANAPAINT">
+    <span>© <span id="yr"></span> JANAPAINT · janapaint.com</span>
+  </div>
+</footer>
+
+<!-- Save prompt -->
+<div class="overlay" id="savePrompt" role="dialog" aria-modal="true" aria-labelledby="spTitle">
+  <div class="dialog">
+    <button class="x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="mini-prev" id="spPrev"></div>
+    <h3 id="spTitle">Inicia sesión para guardar</h3>
+    <p>Inicia sesión para que tus colores queden guardados para la próxima vez que entres.</p>
+    <div class="stack">
+      <button class="btn primary" id="spLogin">Iniciar sesión</button>
+      <button class="btn ghost" id="spGuest">Guardar solo en esta visita</button>
+    </div>
+  </div>
+</div>
+
+<!-- Login -->
+<div class="overlay" id="auth" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+  <div class="dialog">
+    <button class="x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3 id="authTitle">Iniciar sesión</h3>
+    <p id="authSub">Accede para guardar hasta 5 paletas.</p>
+    <form id="authForm" novalidate>
+      <label class="field"><span>Correo electrónico</span><input type="email" id="email" autocomplete="email" required></label>
+      <label class="field"><span>Contraseña</span><input type="password" id="pass" autocomplete="current-password" minlength="6" required></label>
+      <div class="err" id="authErr"></div>
+      <button class="btn primary" style="width:100%" id="authSubmit" type="submit">Entrar</button>
+    </form>
+    <div class="switch"><span id="swText">¿Aún no tienes cuenta?</span> <button id="swBtn" type="button">Crear cuenta</button></div>
+    <p class="note">El inicio de sesión es opcional.</p>
+  </div>
+</div>
+
+<!-- Full / limit -->
+<div class="overlay" id="fullDlg" role="dialog" aria-modal="true">
+  <div class="dialog">
+    <button class="x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3>Ya tienes 5 paletas</h3>
+    <p>Puedes guardar un máximo de 5. Borra una de “Mis paletas” para guardar esta.</p>
+    <button class="btn primary" style="width:100%" id="fullGo">Ver mis paletas</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = s => document.querySelector(s);
+  const MAX = 5;
+
+  /* ---------- Storage (safe) ---------- */
+  const store = {
+    get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+    set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } },
+    del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+  };
+
+  /* ---------- Color utils ---------- */
+  const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+  const rnd = (a,b) => a + Math.random()*(b-a);
+  const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+  function hslToRgb(h,s,l){
+    h = ((h%360)+360)%360; s/=100; l/=100;
+    const k = n => (n + h/30) % 12, a = s*Math.min(l,1-l);
+    const f = n => l - a*Math.max(-1, Math.min(k(n)-3, Math.min(9-k(n), 1)));
+    return [Math.round(f(0)*255), Math.round(f(8)*255), Math.round(f(4)*255)];
+  }
+  const toHex = ([r,g,b]) => "#" + [r,g,b].map(x => x.toString(16).padStart(2,"0")).join("").toUpperCase();
+  const fromHex = h => [1,3,5].map(i => parseInt(h.slice(i,i+2),16));
+  function rgbToHsl([r,g,b]){
+    r/=255; g/=255; b/=255;
+    const mx=Math.max(r,g,b), mn=Math.min(r,g,b); let h=0,s=0; const l=(mx+mn)/2;
+    if(mx!==mn){ const d=mx-mn; s = l>.5 ? d/(2-mx-mn) : d/(mx+mn);
+      h = mx===r ? (g-b)/d + (g<b?6:0) : mx===g ? (b-r)/d+2 : (r-g)/d+4; h*=60; }
+    return [Math.round(h), Math.round(s*100), Math.round(l*100)];
+  }
+  const lum = hex => { const [r,g,b] = fromHex(hex).map(v => { v/=255; return v<=.03928 ? v/12.92 : Math.pow((v+.055)/1.055,2.4); }); return .2126*r+.7152*g+.0722*b; };
+  // Perceptual-ish distance (redmean)
+  function dist(a,b){ const [r1,g1,b1]=fromHex(a),[r2,g2,b2]=fromHex(b), rm=(r1+r2)/2;
+    return Math.sqrt((2+rm/256)*(r1-r2)**2 + 4*(g1-g2)**2 + (2+(255-rm)/256)*(b1-b2)**2); }
+
+  /* ---------- Palette generator ---------- */
+  const SCHEMES = [
+    { name:"Análoga",               offs:[-36,-18,0,18,36] },
+    { name:"Complementaria",        offs:[0,14,-14,180,194] },
+    { name:"Complementaria dividida", offs:[0,12,150,210,-12] },
+    { name:"Triádica",              offs:[0,120,240,16,136] },
+    { name:"Tetrádica",             offs:[0,90,180,270,45] },
+    { name:"Monocromática",         offs:[0,0,0,0,0], mono:true },
+  ];
+  const MOODS = [
+    { name:"Vivo",       s:[62,90], l:[38,66] },
+    { name:"Pastel",     s:[42,78], l:[72,90] },
+    { name:"Suave",      s:[16,42], l:[40,82] },
+    { name:"Profundo",   s:[40,78], l:[16,42] },
+    { name:"Equilibrado",s:[30,82], l:[18,90] },
+    { name:"Tierra",     s:[24,55], l:[26,72], hue:[15,55] },
+  ];
+  const recentBase = [], seen = new Set();
+  let lastCombo = "";
+
+  function freshBase(range){
+    for(let i=0;i<40;i++){
+      const h = range ? rnd(range[0], range[1]) : rnd(0,360);
+      const ok = recentBase.every(b => { const d = Math.abs(((h-b+540)%360)-180); return d > (range ? 8 : 34); });
+      if(ok) return h;
+    }
+    return rnd(0,360);
+  }
+
+  function makePalette(locked){
+    for(let attempt=0; attempt<60; attempt++){
+      let scheme, mood, combo;
+      do { scheme = pick(SCHEMES); mood = pick(MOODS); combo = scheme.name+mood.name; } while(combo === lastCombo);
+      const base = freshBase(mood.hue);
+      // lightness ladder for contrast inside the palette
+      let lr = scheme.mono ? [Math.min(mood.l[0],22), Math.max(mood.l[1],88)] : mood.l;
+      let ladder = [0,1,2,3,4].map(i => lr[0] + (lr[1]-lr[0])*i/4 + rnd(-3,3));
+      if(!scheme.mono) ladder = ladder.sort(() => Math.random()-.5);
+      const cols = scheme.offs.map((o,i) => {
+        if(locked[i]) return locked[i];
+        const h = base + o + rnd(-7,7);
+        const s = clamp(rnd(mood.s[0], mood.s[1]) + (scheme.mono ? rnd(-12,12) : 0), 6, 96);
+        return toHex(hslToRgb(h, s, clamp(ladder[i], 8, 94)));
+      });
+      // every color clearly different from the others
+      let minD = Infinity;
+      for(let i=0;i<5;i++) for(let j=i+1;j<5;j++) minD = Math.min(minD, dist(cols[i], cols[j]));
+      const sig = cols.join("");
+      if(minD < 48 || seen.has(sig)) continue;
+      seen.add(sig); lastCombo = combo;
+      recentBase.push(base); if(recentBase.length > 6) recentBase.shift();
+      return { colors: cols, scheme: scheme.name, mood: mood.name };
+    }
+    // fallback (extremely rare)
+    return { colors: [0,1,2,3,4].map(i => locked[i] || toHex(hslToRgb(rnd(0,360), rnd(30,80), rnd(25,80)))), scheme:"Libre", mood:"Mixto" };
+  }
+
+  /* ---------- State ---------- */
+  let current = null;
+  const locks = [null,null,null,null,null];
+  let session = store.get("jp_session", null); // email
+  let guestSaved = []; // palettes saved without login (this visit only)
+
+  const users = () => store.get("jp_users", {});
+  function getSaved(){ if(session){ const u = users()[session]; return u ? u.palettes : []; } return guestSaved; }
+  function setSaved(list){
+    if(session){ const all = users(); if(all[session]){ all[session].palettes = list; store.set("jp_users", all); } }
+    else guestSaved = list;
+  }
+
+  /* ---------- Icons ---------- */
+  const IC = {
+    lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+    unlock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg>',
+    copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
+    trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+    down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>',
+    load:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h13"/><path d="M12 7l5 5-5 5"/><path d="M21 4v16"/></svg>',
+    x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+  };
+
+  /* ---------- Render palette ---------- */
+  const palEl = $("#palette");
+  function buildSwatches(){
+    palEl.innerHTML = [0,1,2,3,4].map(i => `
+      <div class="sw" data-i="${i}">
+        <div class="sw-color">
+          <div class="sw-tools">
+            <button class="tool" data-act="copy" aria-label="Copiar código">${IC.copy}</button>
+            <button class="tool" data-act="lock" aria-label="Fijar color">${IC.unlock}</button>
+          </div>
+        </div>
+        <div class="sw-label">
+          <button class="hex" data-act="copy"></button>
+          <div class="rgb"></div>
+        </div>
+      </div>`).join("");
+  }
+  function renderPalette(){
+    const nodes = palEl.querySelectorAll(".sw");
+    current.colors.forEach((hex, i) => {
+      const n = nodes[i], [r,g,b] = fromHex(hex);
+      n.querySelector(".sw-color").style.backgroundColor = hex;
+      n.querySelector(".hex").textContent = hex;
+      n.querySelector(".rgb").textContent = `RGB ${r}, ${g}, ${b}`;
+      const lb = n.querySelector('[data-act="lock"]'), on = !!locks[i];
+      n.classList.toggle("locked", on);
+      lb.classList.toggle("on", on); lb.innerHTML = on ? IC.lock : IC.unlock;
+      lb.setAttribute("aria-label", on ? "Desbloquear color" : "Fijar color");
+    });
+    $("#meta").innerHTML = `<span class="chip">Armonía ${current.scheme.toLowerCase()}</span><span class="chip">${current.mood}</span>`;
+  }
+  function generate(){ current = makePalette(locks); renderPalette(); }
+
+  palEl.addEventListener("click", e => {
+    const b = e.target.closest("[data-act]"); if(!b) return;
+    const i = +b.closest(".sw").dataset.i;
+    if(b.dataset.act === "copy") copy(current.colors[i]);
+    else { locks[i] = locks[i] ? null : current.colors[i]; renderPalette(); }
+  });
+
+  function copy(txt){
+    const done = () => toast(`${txt} copiado`);
+    try{
+      navigator.clipboard.writeText(txt).then(done, () => fallbackCopy(txt) ? done() : toast(txt));
+    }catch(e){ fallbackCopy(txt) ? done() : toast(txt); }
+  }
+  function fallbackCopy(t){ try{ const a=document.createElement("textarea"); a.value=t; a.style.position="fixed"; a.style.opacity="0"; document.body.appendChild(a); a.select(); const ok=document.execCommand("copy"); a.remove(); return ok; }catch(e){ return false; } }
+
+  let tt; function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove("show"), 1900); }
+
+  /* ---------- Save flow ---------- */
+  let pendingSave = null;
+  function savePalette(p){
+    const list = getSaved();
+    const sig = p.colors.join("");
+    if(list.some(x => x.colors.join("") === sig)){ toast("Esta paleta ya está guardada"); return; }
+    if(list.length >= MAX){ open("#fullDlg"); return; }
+    list.unshift({ id: Date.now().toString(36), colors: [...p.colors], scheme: p.scheme, mood: p.mood, date: new Date().toISOString() });
+    setSaved(list); renderSaved();
+    toast(session ? "Paleta guardada en tu cuenta" : "Paleta guardada en esta visita");
+  }
+  $("#saveBtn").addEventListener("click", () => {
+    if(session){ savePalette(current); return; }
+    pendingSave = { ...current, colors:[...current.colors] };
+    $("#spPrev").innerHTML = current.colors.map(c => `<span style="background:${c}"></span>`).join("");
+    open("#savePrompt");
+  });
+  $("#spLogin").addEventListener("click", () => { close("#savePrompt"); openAuth("login"); });
+  $("#spGuest").addEventListener("click", () => { close("#savePrompt"); if(pendingSave) savePalette(pendingSave); pendingSave = null; });
+  $("#fullGo").addEventListener("click", () => { close("#fullDlg"); $("#guardadas").scrollIntoView(); });
+
+  /* ---------- Saved carousel ---------- */
+  const track = $("#track");
+  function renderSaved(){
+    const list = getSaved();
+    $("#count").textContent = `${list.length}/${MAX}`;
+    $("#slots").innerHTML = Array.from({length:MAX}, (_,i) => `<span class="slot ${i<list.length?'full':''}"></span>`).join("");
+    if(!list.length){
+      track.innerHTML = `<div class="empty" style="flex:1">Aún no tienes paletas guardadas. Genera una que te guste y pulsa <b>Guardar</b>.</div>`;
+      return;
+    }
+    track.innerHTML = list.map(p => `
+      <div class="card" data-id="${p.id}">
+        <div class="mini" data-a="load" title="Abrir en el generador">${p.colors.map(c=>`<span style="background:${c}" title="${c}"></span>`).join("")}</div>
+        <div class="card-meta">
+          <span>${new Date(p.date).toLocaleDateString("es-ES",{day:"numeric",month:"short"})} · ${p.scheme}</span>
+          <div class="card-acts">
+            <button class="ico" data-a="load" aria-label="Abrir en el generador" title="Abrir">${IC.load}</button>
+            <button class="ico" data-a="pdf" aria-label="Descargar PDF" title="PDF">${IC.down}</button>
+            <button class="ico" data-a="del" aria-label="Borrar" title="Borrar">${IC.trash}</button>
+          </div>
+        </div>
+      </div>`).join("");
+  }
+  track.addEventListener("click", e => {
+    const b = e.target.closest("[data-a]"); if(!b) return;
+    const id = b.closest(".card").dataset.id, list = getSaved(), p = list.find(x => x.id === id);
+    if(!p) return;
+    if(b.dataset.a === "del"){ setSaved(list.filter(x => x.id !== id)); renderSaved(); toast("Paleta borrada"); }
+    else if(b.dataset.a === "pdf") downloadPDF(p);
+    else { current = { colors:[...p.colors], scheme:p.scheme, mood:p.mood }; locks.fill(null); renderPalette(); $("#inicio").scrollIntoView(); }
+  });
+  const step = () => (track.querySelector(".card")?.offsetWidth || 250) + 16;
+  $("#prev").addEventListener("click", () => track.scrollBy({left:-step(), behavior:"smooth"}));
+  $("#next").addEventListener("click", () => track.scrollBy({left: step(), behavior:"smooth"}));
+
+  /* ---------- Auth (optional) ----------
+     Prototype: accounts live in this browser (localStorage).
+     For production, swap these 3 functions for a real backend (e.g. Supabase Auth + a "palettes" table). */
+  let authMode = "login";
+  async function hash(s){
+    try{ const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("janapaint:"+s));
+      return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join(""); }
+    catch(e){ let h=0; for(const c of s) h=(h*31+c.charCodeAt(0))|0; return "x"+h; }
+  }
+  function openAuth(mode){
+    authMode = mode; $("#authErr").textContent = "";
+    const login = mode === "login";
+    $("#authTitle").textContent = login ? "Iniciar sesión" : "Crear cuenta";
+    $("#authSub").textContent = login ? "Accede para guardar hasta 5 paletas." : "Gratis. Tus paletas te esperarán la próxima vez.";
+    $("#authSubmit").textContent = login ? "Entrar" : "Crear cuenta";
+    $("#swText").textContent = login ? "¿Aún no tienes cuenta?" : "¿Ya tienes cuenta?";
+    $("#swBtn").textContent = login ? "Crear cuenta" : "Iniciar sesión";
+    $("#pass").setAttribute("autocomplete", login ? "current-password" : "new-password");
+    open("#auth"); setTimeout(() => $("#email").focus(), 40);
+  }
+  $("#swBtn").addEventListener("click", () => openAuth(authMode === "login" ? "signup" : "login"));
+  $("#authForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const email = $("#email").value.trim().toLowerCase(), pass = $("#pass").value, err = $("#authErr");
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent = "Escribe un correo válido."; return; }
+    if(pass.length < 6){ err.textContent = "La contraseña necesita al menos 6 caracteres."; return; }
+    const all = users(), h = await hash(pass);
+    if(authMode === "signup"){
+      if(all[email]){ err.textContent = "Ya existe una cuenta con ese correo. Inicia sesión."; return; }
+      all[email] = { hash:h, palettes:[], created:new Date().toISOString() };
+    } else {
+      if(!all[email]){ err.textContent = "No encontramos esa cuenta. ¿Quieres crearla?"; return; }
+      if(all[email].hash !== h){ err.textContent = "Contraseña incorrecta."; return; }
+    }
+    // merge palettes saved during this visit
+    const merged = [...guestSaved, ...all[email].palettes].filter((p,i,arr) => arr.findIndex(q => q.colors.join("")===p.colors.join(""))===i).slice(0,MAX);
+    all[email].palettes = merged;
+    if(!store.set("jp_users", all)){ err.textContent = "Tu navegador no permite guardar datos. Prueba otro navegador."; return; }
+    session = email; store.set("jp_session", email); guestSaved = [];
+    close("#auth"); $("#authForm").reset(); renderUser(); renderSaved();
+    if(pendingSave){ savePalette(pendingSave); pendingSave = null; }
+    else toast(authMode === "signup" ? "Cuenta creada" : "Sesión iniciada");
+  });
+  function renderUser(){
+    const box = $("#userBox");
+    if(!session){ box.innerHTML = `<button class="btn small" id="loginBtn">Iniciar sesión</button>`; $("#loginBtn").onclick = () => openAuth("login"); return; }
+    box.innerHTML = `<button class="btn small" id="meBtn" aria-haspopup="true">${session.split("@")[0].slice(0,14)}</button>
+      <div class="menu" id="menu"><p>${session}</p><button id="outBtn">Cerrar sesión</button></div>`;
+    $("#meBtn").onclick = e => { e.stopPropagation(); $("#menu").classList.toggle("open"); };
+    $("#outBtn").onclick = () => { session = null; store.del("jp_session"); renderUser(); renderSaved(); toast("Sesión cerrada"); };
+  }
+  document.addEventListener("click", () => $("#menu")?.classList.remove("open"));
+
+  /* ---------- Overlays ---------- */
+  function open(sel){ $(sel).classList.add("open"); document.body.style.overflow = "hidden"; }
+  function close(sel){ $(sel).classList.remove("open"); if(!document.querySelector(".overlay.open")) document.body.style.overflow = ""; }
+  document.querySelectorAll(".overlay").forEach(o => o.addEventListener("click", e => {
+    if(e.target === o || e.target.closest("[data-close]")){ close("#"+o.id); if(o.id==="savePrompt") pendingSave=null; }
+  }));
+
+  /* ---------- Keyboard ---------- */
+  document.addEventListener("keydown", e => {
+    if(e.key === "Escape"){ document.querySelectorAll(".overlay.open").forEach(o => close("#"+o.id)); return; }
+    const tag = (e.target.tagName||"").toLowerCase();
+    if(e.code === "Space" && !document.querySelector(".overlay.open") && !["input","textarea","button","a"].includes(tag)){
+      e.preventDefault(); generate();
+    }
+  });
+  $("#genBtn").addEventListener("click", generate);
+
+  /* ---------- PDF (built in the browser, no libraries) ---------- */
+  let logoJpeg = null;
+  function prepLogo(){
+    const img = document.querySelector(".brand img");
+    const go = () => { try{
+      const c = document.createElement("canvas"); c.width = img.naturalWidth; c.height = img.naturalHeight;
+      const x = c.getContext("2d"); x.fillStyle="#fff"; x.fillRect(0,0,c.width,c.height); x.drawImage(img,0,0);
+      logoJpeg = { data: atob(c.toDataURL("image/jpeg", .92).split(",")[1]), w:c.width, h:c.height };
+    }catch(e){ logoJpeg = null; } };
+    img.complete ? go() : img.addEventListener("load", go);
+  }
+  const esc = s => s.replace(/\\/g,"\\\\").replace(/\(/g,"\\(").replace(/\)/g,"\\)");
+  const f3 = n => (Math.round(n*1000)/1000).toString();
+  function buildPDF(p){
+    const W=595, H=842, M=44, gap=8, cw=(W-2*M-gap*4)/5, top=H-150, ch=380;
+    let s = "";
+    if(logoJpeg){ const lw=150, lh=lw*logoJpeg.h/logoJpeg.w; s += `q ${lw} 0 0 ${f3(lh)} ${M} ${f3(H-M-lh)} cm /Im1 Do Q\n`; }
+    const date = new Date().toLocaleDateString("es-ES",{day:"numeric",month:"long",year:"numeric"});
+    s += `0 0 0 rg BT /F2 22 Tf ${W-M-190} ${H-M-24} Td (${esc("Paleta de colores")}) Tj ET\n`;
+    s += `0.45 0.45 0.45 rg BT /F1 10 Tf ${W-M-190} ${H-M-42} Td (${esc(`Armonía ${p.scheme.toLowerCase()} · ${p.mood}`)}) Tj ET\n`;
+    s += `BT /F1 10 Tf ${W-M-190} ${H-M-56} Td (${esc(date)}) Tj ET\n`;
+    p.colors.forEach((hex,i) => {
+      const [r,g,b] = fromHex(hex), x = M + i*(cw+gap), y = top-ch;
+      s += `${f3(r/255)} ${f3(g/255)} ${f3(b/255)} rg ${f3(x)} ${y} ${f3(cw)} ${ch} re f\n`;
+      if(lum(hex) > .85) s += `0.85 0.85 0.85 RG 0.6 w ${f3(x)} ${y} ${f3(cw)} ${ch} re S\n`;
+      const [hh,ss,ll] = rgbToHsl([r,g,b]);
+      s += `0 0 0 rg BT /F2 12.5 Tf ${f3(x)} ${y-22} Td (${hex}) Tj ET\n`;
+      s += `0.4 0.4 0.4 rg BT /F1 8.5 Tf ${f3(x)} ${y-37} Td (RGB ${r}, ${g}, ${b}) Tj ET\n`;
+      s += `BT /F1 8.5 Tf ${f3(x)} ${y-49} Td (HSL ${hh}, ${ss}%, ${ll}%) Tj ET\n`;
+    });
+    // horizontal strip
+    const sy = top-ch-150;
+    s += `0 0 0 rg BT /F2 11 Tf ${M} ${sy+60} Td (${esc("Vista en franja")}) Tj ET\n`;
+    p.colors.forEach((hex,i) => { const [r,g,b]=fromHex(hex), w=(W-2*M)/5;
+      s += `${f3(r/255)} ${f3(g/255)} ${f3(b/255)} rg ${f3(M+i*w)} ${sy} ${f3(w+0.5)} 44 re f\n`; });
+    s += `0.55 0.55 0.55 rg BT /F1 9 Tf ${M} 40 Td (${esc("Creado con JANAPAINT · janapaint.com")}) Tj ET\n`;
+
+    const objs = [];
+    objs.push(`<< /Type /Catalog /Pages 2 0 R >>`);
+    objs.push(`<< /Type /Pages /Kids [3 0 R] /Count 1 >>`);
+    objs.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 4 0 R /F2 5 0 R >>${logoJpeg?" /XObject << /Im1 6 0 R >>":""} >> /Contents 7 0 R >>`);
+    objs.push(`<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>`);
+    objs.push(`<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>`);
+    objs.push(logoJpeg
+      ? `<< /Type /XObject /Subtype /Image /Width ${logoJpeg.w} /Height ${logoJpeg.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${logoJpeg.data.length} >>\nstream\n${logoJpeg.data}\nendstream`
+      : `<< >>`);
+    objs.push(`<< /Length ${s.length} >>\nstream\n${s}endstream`);
+    let out = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n"; const offs = [];
+    objs.forEach((o,i) => { offs.push(out.length); out += `${i+1} 0 obj\n${o}\nendobj\n`; });
+    const xref = out.length;
+    out += `xref\n0 ${objs.length+1}\n0000000000 65535 f \n` + offs.map(o => String(o).padStart(10,"0")+" 00000 n \n").join("");
+    out += `trailer\n<< /Size ${objs.length+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+    const bytes = new Uint8Array(out.length);
+    for(let i=0;i<out.length;i++) bytes[i] = out.charCodeAt(i) & 255; // text is Latin-1 (WinAnsi)
+    return bytes;
+  }
+
+  // Downloads: claude.ai preview uses the host's download capability; a normal website uses a plain link.
+  let dlNS = null;
+  if(window.claude && typeof window.claude.use === "function"){
+    try{ window.claude.use("downloads").then(ns => { dlNS = ns; }, () => {}); }catch(e){}
+  }
+  async function downloadPDF(p){
+    const bytes = buildPDF(p);
+    const name = `janapaint-${p.colors.map(c=>c.slice(1)).join("-").toLowerCase()}.pdf`;
+    const blob = new Blob([bytes], {type:"application/pdf"});
+    if(dlNS){
+      try{ await dlNS.save({ filename:name, data:blob }); toast("PDF descargado"); }
+      catch(e){ if(e && e.code !== "declined") toast("No se pudo descargar el PDF aquí"); }
+      return;
+    }
+    try{
+      const url = URL.createObjectURL(blob), a = document.createElement("a");
+      a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000); toast("PDF descargado");
+    }catch(e){ toast("No se pudo descargar el PDF"); }
+  }
+  $("#pdfBtn").addEventListener("click", () => downloadPDF(current));
+
+  /* ---------- Init ---------- */
+  $("#yr").textContent = new Date().getFullYear();
+  buildSwatches(); generate(); renderSaved(); renderUser(); prepLogo();
+})();
+</script>
+</body>
+</html>
