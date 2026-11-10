@@ -4,6 +4,9 @@ description: Los hipopótamos no sudan sangre: segregan un líquido rojo y naran
 date: 2026-11-10
 tag: Animales
 colors: ["#6E6470","#A88E96","#B3261E","#E0782C","#5E7F7A"]
+image: /blog/img/hipopotamo-y-cria-leif-linding.webp
+imageAlt: Un hipopótamo adulto y su cría caminando sobre tierra seca, con la piel rosada alrededor de los ojos y las orejas
+imageCaption: Un hipopótamo adulto con su cría. Fíjate en los tonos rosados de su piel alrededor de los ojos y las orejas. Foto: Leif Linding en Unsplash.
 ---
 
 Durante siglos se dijo que el hipopótamo **sudaba sangre**. No es difícil entender por qué: quien ve uno de cerca, fuera del agua, puede encontrarse con su piel cubierta de gotas de un rojo intenso, como si estuviera herido. Pero no es sangre. Y, en realidad, tampoco es sudor.
