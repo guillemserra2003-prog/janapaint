@@ -1,5 +1,6 @@
 ---
 title: Color y empresa: por qué la coherencia vende más que la creatividad
+seoTitle: Colores corporativos: por qué la coherencia vende más
 description: Las marcas que reconocemos al instante no cambian de color cada temporada. Te contamos por qué y cómo aplicarlo en tu negocio.
 date: 2026-11-01
 tag: Empresa

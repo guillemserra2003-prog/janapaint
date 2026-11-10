@@ -1,5 +1,6 @@
 ---
 title: La rueda cromática explicada: colores complementarios, análogos y triádicos
+seoTitle: Rueda cromática: colores complementarios, análogos y más
 description: Qué es la rueda cromática, qué son los colores primarios, secundarios y terciarios, y cómo usar las 6 armonías de color con paletas y códigos HEX listos.
 date: 2026-11-10
 tag: Teoría del color

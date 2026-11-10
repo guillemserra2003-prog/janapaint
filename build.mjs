@@ -175,6 +175,8 @@ const header = `<header><div class="wrap bar">
   <nav><a class="navlink" href="/">Generador</a><a class="navlink" href="/blog/">Blog</a></nav>
 </div></header>`;
 const footer = `<footer><div class="wrap"><img src="/assets/logo.png" alt="JANAPAINT" width="640" height="291"><span><a href="/colores-corporativos/">Colores corporativos</a> · <a href="/blog/">Blog</a> · <a href="/privacidad/">Privacidad</a> · <a href="/cookies/">Cookies</a> · © ${new Date().getFullYear()} JANAPAINT</span></div></footer>`;
+// Google shows ~60 characters of a title: add the brand only when it fits.
+const pageTitle = (t) => (t.length + 12 <= 64 ? `${t} | JANAPAINT` : t);
 const jsonld = o => JSON.stringify(o).replace(/</g, "\\u003c");
 
 function page({ title, description, canonical, ogImage, ogType = "website", body, ld, extraHead = "" }) {
@@ -263,7 +265,7 @@ posts.forEach((p, i) => {
   const og = p.image ? SITE + p.image : `${SITE}/blog/og/${p.slug}.png`;
   const related = posts.filter(q => q !== p).sort((a, b) => (b.tag === p.tag) - (a.tag === p.tag)).slice(0, 3);
   write(path.join(DIST, `blog/${p.slug}/index.html`), page({
-    title: `${p.title} | JANAPAINT`,
+    title: pageTitle(p.seoTitle || p.title),
     description: p.description,
     canonical: url,
     ogType: "article",
@@ -311,7 +313,7 @@ for (const f of fs.readdirSync(path.join(ROOT, "pages")).filter(f => f.endsWith(
   const url = `${SITE}/${slug}/`;
   PAGES.push({ url, lastmod: meta.updated || TODAY });
   write(path.join(DIST, slug, "index.html"), page({
-    title: `${meta.title} | JANAPAINT`, description: meta.description, canonical: url, ogImage: `${SITE}/assets/og.png`,
+    title: pageTitle(meta.seoTitle || meta.title), description: meta.description, canonical: url, ogImage: `${SITE}/assets/og.png`,
     ld: { "@context": "https://schema.org", "@type": "WebPage", name: meta.title, url, inLanguage: "es" },
     body: `<article class="post-page"><div class="wrap narrow" style="padding-top:40px;padding-bottom:60px">
   <h1>${esc(meta.title)}</h1>
@@ -339,6 +341,24 @@ write(path.join(DIST, "blog/feed.xml"), `<?xml version="1.0" encoding="UTF-8"?>
 ${posts.slice(0, 30).map(p => `<item><title>${esc(p.title)}</title><link>${SITE}/blog/${p.slug}/</link><guid>${SITE}/blog/${p.slug}/</guid><pubDate>${new Date(p.date + "T08:00:00Z").toUTCString()}</pubDate><description>${esc(p.description)}</description></item>`).join("\n")}
 </channel></rss>
 `);
+
+// IndexNow: tell Bing (and other engines) about new or updated pages, only on production builds.
+if (CFG.indexNowKey) {
+  write(path.join(DIST, `${CFG.indexNowKey}.txt`), CFG.indexNowKey);
+  if (process.env.VERCEL_ENV === "production") {
+    const since = new Date(Date.now() - 3 * 864e5).toISOString().slice(0, 10);
+    const fresh = urls.filter(u => u.lastmod >= since).map(u => u.loc);
+    if (fresh.length) {
+      try {
+        const r = await fetch("https://api.indexnow.org/indexnow", {
+          method: "POST", headers: { "Content-Type": "application/json; charset=utf-8" },
+          body: JSON.stringify({ host: new URL(SITE).host, key: CFG.indexNowKey, keyLocation: `${SITE}/${CFG.indexNowKey}.txt`, urlList: fresh }),
+        });
+        console.log(`IndexNow: ${fresh.length} URL(s) enviadas → HTTP ${r.status}`);
+      } catch (e) { console.log("IndexNow: no se pudo avisar (no pasa nada):", e.message); }
+    }
+  }
+}
 
 const pending = all.length - posts.length;
 console.log(`✓ ${posts.length} artículos publicados${pending ? ` · ${pending} en borrador o programados` : ""} → dist/`);

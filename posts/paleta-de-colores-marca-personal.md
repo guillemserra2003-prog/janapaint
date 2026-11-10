@@ -1,5 +1,6 @@
 ---
 title: Tu marca personal también tiene colores (aunque no los hayas elegido)
+seoTitle: Colores para tu marca personal: cómo elegir tu paleta
 description: Cada foto, cada post y cada presentación ya está diciendo algo de ti. Elegir una paleta es decidir qué dice.
 date: 2026-11-08
 tag: Marca personal

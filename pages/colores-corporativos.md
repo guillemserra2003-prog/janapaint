@@ -1,5 +1,6 @@
 ---
 title: Colores corporativos: 10 paletas para empresas con códigos HEX
+seoTitle: Colores corporativos: 10 paletas para empresas
 description: Paletas de colores corporativos para empresas, con códigos HEX listos para copiar: ejecutivas, de confianza, sostenibles, de lujo, tecnológicas y más. Y cómo elegir los tuyos.
 updated: 2026-11-10
 ---

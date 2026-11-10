@@ -1,5 +1,6 @@
 ---
 title: El «sudor rojo» del hipopótamo: el protector solar natural de colores
+seoTitle: El sudor rojo del hipopótamo: un protector solar natural
 description: Los hipopótamos no sudan sangre: segregan un líquido rojo y naranja que les protege del sol y de las bacterias. Te contamos qué es, por qué cambia de color y su paleta.
 date: 2026-11-10
 tag: Animales

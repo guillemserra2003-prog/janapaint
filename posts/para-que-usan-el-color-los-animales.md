@@ -1,5 +1,6 @@
 ---
 title: Avisar, esconderse o enamorar: para qué usan el color los animales
+seoTitle: Para qué usan el color los animales: avisar y esconderse
 description: En la naturaleza, el color es un mensaje. Algunos animales lo usan para advertir, otros para desaparecer y otros para conquistar.
 date: 2026-10-15
 tag: Animales
