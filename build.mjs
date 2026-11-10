@@ -174,7 +174,7 @@ const header = `<header><div class="wrap bar">
   <a class="brand" href="/" aria-label="JANAPAINT, inicio"><img src="/assets/logo.png" alt="JANAPAINT" width="640" height="291"></a>
   <nav><a class="navlink" href="/">Generador</a><a class="navlink" href="/blog/">Blog</a></nav>
 </div></header>`;
-const footer = `<footer><div class="wrap"><img src="/assets/logo.png" alt="JANAPAINT" width="640" height="291"><span><a href="/colores-corporativos/">Colores corporativos</a> · <a href="/blog/">Blog</a> · <a href="/privacidad/">Política de privacidad</a> · © ${new Date().getFullYear()} JANAPAINT</span></div></footer>`;
+const footer = `<footer><div class="wrap"><img src="/assets/logo.png" alt="JANAPAINT" width="640" height="291"><span><a href="/colores-corporativos/">Colores corporativos</a> · <a href="/blog/">Blog</a> · <a href="/privacidad/">Privacidad</a> · <a href="/cookies/">Cookies</a> · © ${new Date().getFullYear()} JANAPAINT</span></div></footer>`;
 const jsonld = o => JSON.stringify(o).replace(/</g, "\\u003c");
 
 function page({ title, description, canonical, ogImage, ogType = "website", body, ld, extraHead = "" }) {
@@ -315,7 +315,7 @@ for (const f of fs.readdirSync(path.join(ROOT, "pages")).filter(f => f.endsWith(
     ld: { "@context": "https://schema.org", "@type": "WebPage", name: meta.title, url, inLanguage: "es" },
     body: `<article class="post-page"><div class="wrap narrow" style="padding-top:40px;padding-bottom:60px">
   <h1>${esc(meta.title)}</h1>
-  ${slug === "privacidad" ? `<p class="by">Última actualización: ${fmtDate(meta.updated || TODAY)}</p>` : ""}
+  ${["privacidad", "cookies"].includes(slug) ? `<p class="by">Última actualización: ${fmtDate(meta.updated || TODAY)}</p>` : ""}
   <div class="content">
 ${markdown(fill(m[2]))}
   </div>

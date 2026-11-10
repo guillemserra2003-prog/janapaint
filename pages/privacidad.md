@@ -46,7 +46,7 @@ Usamos proveedores que tratan datos por cuenta nuestra y con garantías adecuada
 
 ## Cookies y almacenamiento en tu navegador
 
-No usamos cookies de publicidad ni de seguimiento. Para contar visitas usamos una analítica anónima sin cookies. Solo usamos el almacenamiento de tu navegador para mantener tu sesión iniciada. Es técnicamente necesario para que la cuenta funcione.
+No usamos cookies de publicidad ni de seguimiento. Para contar visitas usamos una analítica anónima sin cookies. Solo usamos el almacenamiento de tu navegador para mantener tu sesión iniciada. Es técnicamente necesario para que la cuenta funcione. Tienes todos los detalles en nuestra [política de cookies](/cookies/).
 
 ## Tus derechos
 
