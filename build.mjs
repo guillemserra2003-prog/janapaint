@@ -22,6 +22,37 @@ const copyDir = (a, b) => { fs.mkdirSync(b, { recursive: true }); for (const f o
 const fmtDate = d => new Date(d + "T12:00:00Z").toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 const slugify = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
+/* ---------- images ---------- */
+// Reads width/height from PNG, JPEG or WebP files in /public so the page doesn't jump while loading.
+function imgSize(src) {
+  try {
+    if (!src.startsWith("/")) return null;
+    const b = fs.readFileSync(path.join(ROOT, "public", src));
+    if (b.readUInt32BE(0) === 0x89504e47) return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) };
+    if (b.toString("ascii", 0, 4) === "RIFF" && b.toString("ascii", 8, 12) === "WEBP") {
+      const t = b.toString("ascii", 12, 16);
+      if (t === "VP8 ") return { w: b.readUInt16LE(26) & 0x3fff, h: b.readUInt16LE(28) & 0x3fff };
+      if (t === "VP8L") { const n = b.readUInt32LE(21); return { w: (n & 0x3fff) + 1, h: ((n >> 14) & 0x3fff) + 1 }; }
+      if (t === "VP8X") return { w: 1 + b.readUIntLE(24, 3), h: 1 + b.readUIntLE(27, 3) };
+    }
+    if (b[0] === 0xff && b[1] === 0xd8) {
+      let i = 2;
+      while (i < b.length) {
+        if (b[i] !== 0xff) { i++; continue; }
+        const m = b[i + 1], len = b.readUInt16BE(i + 2);
+        if (m >= 0xc0 && m <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(m)) return { h: b.readUInt16BE(i + 5), w: b.readUInt16BE(i + 7) };
+        i += 2 + len;
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+function imgTag(src, alt, eager) {
+  const s = imgSize(src);
+  if (src.startsWith("/") && !s) throw new Error(`No encuentro la imagen ${src} (debe estar en public${src})`);
+  return `<img src="${esc(src)}" alt="${esc(alt)}"${s ? ` width="${s.w}" height="${s.h}"` : ""} ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
+}
+
 /* ---------- tiny markdown ---------- */
 function inline(s) {
   return esc(s)
@@ -41,6 +72,8 @@ function markdown(md) {
     const line = raw.trim();
     let m;
     if (!line) { flushP(); flushL(); continue; }
+    // ![texto alternativo](/blog/img/foto.webp "Pie de foto")
+    if ((m = line.match(/^!\[(.*?)\]\((\S+?)(?:\s+"(.*)")?\)$/))) { flushP(); flushL(); out.push(`<figure>${imgTag(m[2], m[1])}${m[3] ? `<figcaption>${inline(m[3])}</figcaption>` : ""}</figure>`); continue; }
     if ((m = line.match(/^(#{2,4})\s+(.*)/))) { flushP(); flushL(); const n = m[1].length; out.push(`<h${n} id="${slugify(m[2])}">${inline(m[2])}</h${n}>`); continue; }
     if ((m = line.match(/^[-*]\s+(.*)/))) { flushP(); if (!list || list.t !== "ul") { flushL(); list = { t: "ul", items: [] }; } list.items.push(m[1]); continue; }
     if ((m = line.match(/^\d+[.)]\s+(.*)/))) { flushP(); if (!list || list.t !== "ol") { flushL(); list = { t: "ol", items: [] }; } list.items.push(m[1]); continue; }
@@ -106,15 +139,15 @@ const HEAD_COMMON = `<meta name="theme-color" content="#ffffff">
 <meta name="twitter:card" content="summary_large_image">${CFG.googleVerification ? `\n<meta name="google-site-verification" content="${esc(CFG.googleVerification)}">` : ""}`;
 const FONTS = `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">`;
-const cover = cs => `<div class="cover">${cs.map(c => `<span style="background:${c}"></span>`).join("")}</div>`;
+const cover = (cs, p) => p && p.image ? `<div class="cover img">${imgTag(p.image, p.imageAlt || p.title)}</div>` : `<div class="cover">${cs.map(c => `<span style="background:${c}"></span>`).join("")}</div>`;
 const card = p => `<a class="post" href="/blog/${p.slug}/">
-        ${cover(p.colors)}
+        ${cover(p.colors, p)}
         <h3>${esc(p.title)}</h3>
         <p>${esc(p.description)}</p>
         <span class="tag">${esc(p.tag)}</span> <span class="by">· ${fmtDate(p.date)} · ${p.min} min</span>
       </a>`;
 const featured = p => p ? `<a class="featured" href="/blog/${p.slug}/">
-        ${cover(p.colors)}
+        ${cover(p.colors, p)}
         <div>
           <span class="latest">ÚLTIMO</span><span class="tag">${esc(p.tag)}</span>
           <h3>${esc(p.title)}</h3>
@@ -202,18 +235,19 @@ write(path.join(DIST, "blog/index.html"), page({
 // Posts
 posts.forEach((p, i) => {
   const url = `${SITE}/blog/${p.slug}/`;
-  write(path.join(DIST, `blog/og/${p.slug}.png`), palettePNG(p.colors));
+  if (!p.image) write(path.join(DIST, `blog/og/${p.slug}.png`), palettePNG(p.colors));
+  const og = p.image ? SITE + p.image : `${SITE}/blog/og/${p.slug}.png`;
   const related = posts.filter(q => q !== p).sort((a, b) => (b.tag === p.tag) - (a.tag === p.tag)).slice(0, 3);
   write(path.join(DIST, `blog/${p.slug}/index.html`), page({
     title: `${p.title} | JANAPAINT`,
     description: p.description,
     canonical: url,
     ogType: "article",
-    ogImage: `${SITE}/blog/og/${p.slug}.png`,
+    ogImage: og,
     extraHead: `<meta property="article:published_time" content="${p.date}">\n<meta property="article:section" content="${esc(p.tag)}">\n`,
     ld: { "@context": "https://schema.org", "@graph": [
       { "@type": "BlogPosting", headline: p.title, description: p.description, datePublished: p.date, dateModified: p.updated || p.date,
-        inLanguage: "es", wordCount: p.words, articleSection: p.tag, image: `${SITE}/blog/og/${p.slug}.png`, mainEntityOfPage: url,
+        inLanguage: "es", wordCount: p.words, articleSection: p.tag, image: og, mainEntityOfPage: url,
         author: { "@type": "Organization", name: CFG.author || "JANAPAINT", url: SITE + "/" },
         publisher: { "@type": "Organization", name: "JANAPAINT", logo: { "@type": "ImageObject", url: `${SITE}/assets/logo.png` } } },
       { "@type": "BreadcrumbList", itemListElement: [
@@ -221,7 +255,7 @@ posts.forEach((p, i) => {
         { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE}/blog/` },
         { "@type": "ListItem", position: 3, name: p.title, item: url } ] } ] },
     body: `<article class="post-page">
-  <div class="post-cover">${p.colors.map(c => `<span style="background:${c}"></span>`).join("")}</div>
+  ${p.image ? `<div class="wrap narrow"><figure class="post-hero">${imgTag(p.image, p.imageAlt || p.title, true)}${p.imageCaption ? `<figcaption>${esc(p.imageCaption)}</figcaption>` : ""}</figure></div>` : `<div class="post-cover">${p.colors.map(c => `<span style="background:${c}"></span>`).join("")}</div>`}
   <div class="wrap narrow">
     <nav class="crumbs" aria-label="Ruta"><a href="/">Inicio</a> / <a href="/blog/">Blog</a> / <span>${esc(p.tag)}</span></nav>
     <span class="tag">${esc(p.tag)}</span>

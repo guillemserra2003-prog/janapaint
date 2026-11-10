@@ -40,6 +40,22 @@ Texto con **negrita**, *cursiva* y [un enlace](/blog/otro-articulo/).
 - Añade `draft: true` → queda como **borrador** y no se publica.
 - `colors` → siempre 5 códigos HEX. Se usan de portada y como imagen al compartir.
 
+## Imágenes
+
+Guarda las imágenes en `public/blog/img/` (mejor en `.webp` o `.jpg`, máx. ~1600 px de ancho).
+
+Portada del artículo (opcional; si no hay, se usa la paleta de colores):
+```
+image: /blog/img/mi-foto.webp
+imageAlt: Descripción de la imagen para Google y personas ciegas
+imageCaption: Pie de foto (opcional)
+```
+
+Imagen dentro del texto, con pie de foto:
+```
+![Descripción de la imagen](/blog/img/mi-foto.webp "Pie de foto")
+```
+
 ## Probar en local (opcional)
 
 ```
