@@ -40,12 +40,13 @@ Usamos proveedores que tratan datos por cuenta nuestra y con garantías adecuada
 
 - **Supabase:** base de datos y sistema de cuentas. Los datos se alojan en servidores de la Unión Europea (Frankfurt, Alemania).
 - **Vercel:** alojamiento de la web. Puede tratar datos técnicos como la dirección IP para servir la página. Cuando hay transferencias fuera de la UE, se realizan con las garantías previstas en el RGPD, como las cláusulas contractuales tipo.
+- **Vercel Web Analytics:** cuenta las visitas de forma anónima y agregada (páginas vistas, país aproximado y tipo de dispositivo). No usa cookies ni nos permite identificarte.
 - **Google Fonts y jsDelivr:** sirven las tipografías y una librería técnica de la web, y reciben tu dirección IP al cargar la página.
 - Cuando empecemos a enviar novedades por email, usaremos un proveedor de envío de correos y lo añadiremos a esta lista.
 
 ## Cookies y almacenamiento en tu navegador
 
-No usamos cookies de publicidad ni de analítica. Solo usamos el almacenamiento de tu navegador para mantener tu sesión iniciada. Es técnicamente necesario para que la cuenta funcione.
+No usamos cookies de publicidad ni de seguimiento. Para contar visitas usamos una analítica anónima sin cookies. Solo usamos el almacenamiento de tu navegador para mantener tu sesión iniciada. Es técnicamente necesario para que la cuenta funcione.
 
 ## Tus derechos
 

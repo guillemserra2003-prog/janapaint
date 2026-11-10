@@ -20,7 +20,7 @@ h1,h2,h3{font-family:var(--head);font-weight:600;letter-spacing:-.01em;margin:0}
 .cover span{flex:1}
 .cover.img{display:block}.cover.img img{width:100%;height:100%;object-fit:cover;display:block}
 figure{margin:30px 0}
-figure img{width:100%;height:auto;display:block;border-radius:14px;background:var(--soft)}
+figure img{width:100%;height:auto;display:block;border-radius:14px;background:var(--soft);border:1px solid var(--line)}
 figcaption{font-size:14px;color:var(--ink-3);text-align:center;margin-top:10px;line-height:1.5}
 .post-hero{margin:28px 0 0}.post-hero img{max-height:460px;object-fit:cover}
 .latest{font-size:12px;font-weight:700;background:var(--ink);color:#fff;border-radius:999px;padding:3px 10px;margin-right:8px;letter-spacing:.04em}
@@ -67,3 +67,17 @@ footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:1
 footer img{height:34px;width:auto}
 @media (max-width:860px){.grid{grid-template-columns:1fr 1fr}.featured{grid-template-columns:1fr}}
 @media (max-width:640px){.wrap{padding:0 16px}.brand img{height:40px}.grid{grid-template-columns:1fr}.blog-top{padding:32px 16px 48px}.content{font-size:17px}}
+
+/* palette blocks */
+.pal{margin:28px 0;border:1px solid var(--line);border-radius:16px;padding:10px;background:#fff}
+.pal-row{display:flex;height:120px;border-radius:10px;overflow:hidden}
+.pal-sw{flex:1;border:0;padding:0 0 10px;display:flex;align-items:flex-end;justify-content:center;font-family:var(--mono);font-size:12.5px;cursor:pointer;transition:flex .18s ease}
+.pal-sw:hover{flex:1.35}
+.pal figcaption{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;text-align:left;margin:12px 4px 2px;font-size:15px;color:var(--ink)}
+.pal-open{font-size:14px;font-weight:700;text-decoration:none;color:var(--ink);white-space:nowrap}
+.pal-open:hover{text-decoration:underline}
+.pal-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.pal-grid .pal{margin:12px 0}
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:999px;font-weight:500;font-size:14.5px;opacity:0;pointer-events:none;transition:all .22s ease;z-index:80}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (max-width:640px){.pal-row{height:96px}.pal-sw{font-size:10.5px}.pal-grid{grid-template-columns:1fr}}

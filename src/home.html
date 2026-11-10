@@ -285,7 +285,7 @@
 <footer>
   <div class="wrap">
     <img src="/assets/logo.png" alt="JANAPAINT">
-    <span><a href="/privacidad/">Política de privacidad</a> · © <span id="yr"></span> JANAPAINT</span>
+    <span><a href="/colores-corporativos/">Colores corporativos</a> · <a href="/blog/">Blog</a> · <a href="/privacidad/">Política de privacidad</a> · © <span id="yr"></span> JANAPAINT</span>
   </div>
 </footer>
 
@@ -879,7 +879,17 @@
 
   /* ---------- Init ---------- */
   $("#yr").textContent = new Date().getFullYear();
-  buildSwatches(); generate(); renderSaved(); renderUser(); prepLogo();
+  // Open a palette from a link: janapaint.com/#p=1F2A44-E8C547-F4EFE6-C8553D-6C8EAD
+  function paletteFromHash(){
+    const m = (location.hash || "").match(/^#p=((?:[0-9a-fA-F]{6}-){4}[0-9a-fA-F]{6})$/);
+    if(!m) return false;
+    current = { colors: m[1].split("-").map(c => "#" + c.toUpperCase()), scheme: "Compartida", mood: "Del blog" };
+    locks.fill(null); renderPalette();
+    try{ history.replaceState(null, "", location.pathname); }catch(e){}
+    return true;
+  }
+  window.addEventListener("hashchange", paletteFromHash);
+  buildSwatches(); if(!paletteFromHash()) generate(); renderSaved(); renderUser(); prepLogo();
 })();
 </script>
 </body>

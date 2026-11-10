@@ -53,6 +53,17 @@ function imgTag(src, alt, eager) {
   return `<img src="${esc(src)}" alt="${esc(alt)}"${s ? ` width="${s.w}" height="${s.h}"` : ""} ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
 }
 
+/* ---------- palette block ---------- */
+function paletteBlock(title, cols) {
+  if (cols.length < 2 || cols.length > 6 || !cols.every(c => /^#[0-9A-F]{6}$/.test(c))) throw new Error(`Paleta mal escrita: ${title}`);
+  const lum = h => { const [r, g, b] = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(v => v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4); return .2126 * r + .7152 * g + .0722 * b; };
+  const link = cols.length === 5 ? `<a class="pal-open" href="/#p=${cols.map(c => c.slice(1)).join("-")}">Abrir en el generador →</a>` : "";
+  return `<figure class="pal">
+  <div class="pal-row">${cols.map(c => `<button type="button" class="pal-sw" data-hex="${c}" style="background:${c};color:${lum(c) > .179 ? "#111" : "#fff"}" title="Copiar ${c}"><span>${c}</span></button>`).join("")}</div>
+  <figcaption><strong>${inline(title)}</strong>${link}</figcaption>
+</figure>`;
+}
+
 /* ---------- tiny markdown ---------- */
 function inline(s) {
   return esc(s)
@@ -72,6 +83,8 @@ function markdown(md) {
     const line = raw.trim();
     let m;
     if (!line) { flushP(); flushL(); continue; }
+    // [[paleta: Título | #A1B2C3,#...(5)]]
+    if ((m = line.match(/^\[\[paleta:\s*(.+?)\s*\|\s*([#0-9A-Fa-f,\s]+)\]\]$/))) { flushP(); flushL(); out.push(paletteBlock(m[1], m[2].split(",").map(s => s.trim().toUpperCase()))); continue; }
     // ![texto alternativo](/blog/img/foto.webp "Pie de foto")
     if ((m = line.match(/^!\[(.*?)\]\((\S+?)(?:\s+"(.*)")?\)$/))) { flushP(); flushL(); out.push(`<figure>${imgTag(m[2], m[1])}${m[3] ? `<figcaption>${inline(m[3])}</figcaption>` : ""}</figure>`); continue; }
     if ((m = line.match(/^(#{2,4})\s+(.*)/))) { flushP(); flushL(); const n = m[1].length; out.push(`<h${n} id="${slugify(m[2])}">${inline(m[2])}</h${n}>`); continue; }
@@ -136,7 +149,9 @@ const HEAD_COMMON = `<meta name="theme-color" content="#ffffff">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <meta property="og:site_name" content="JANAPAINT">
 <meta property="og:locale" content="es_ES">
-<meta name="twitter:card" content="summary_large_image">${CFG.googleVerification ? `\n<meta name="google-site-verification" content="${esc(CFG.googleVerification)}">` : ""}`;
+<meta name="twitter:card" content="summary_large_image">
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script>
+<script defer src="/_vercel/insights/script.js"></script>${CFG.googleVerification ? `\n<meta name="google-site-verification" content="${esc(CFG.googleVerification)}">` : ""}`;
 const FONTS = `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">`;
 const cover = (cs, p) => p && p.image ? `<div class="cover img">${imgTag(p.image, p.imageAlt || p.title)}</div>` : `<div class="cover">${cs.map(c => `<span style="background:${c}"></span>`).join("")}</div>`;
@@ -159,7 +174,7 @@ const header = `<header><div class="wrap bar">
   <a class="brand" href="/" aria-label="JANAPAINT, inicio"><img src="/assets/logo.png" alt="JANAPAINT" width="640" height="291"></a>
   <nav><a class="navlink" href="/">Generador</a><a class="navlink" href="/blog/">Blog</a></nav>
 </div></header>`;
-const footer = `<footer><div class="wrap"><img src="/assets/logo.png" alt="JANAPAINT" width="640" height="291"><span><a href="/privacidad/">Política de privacidad</a> · © ${new Date().getFullYear()} JANAPAINT</span></div></footer>`;
+const footer = `<footer><div class="wrap"><img src="/assets/logo.png" alt="JANAPAINT" width="640" height="291"><span><a href="/colores-corporativos/">Colores corporativos</a> · <a href="/blog/">Blog</a> · <a href="/privacidad/">Política de privacidad</a> · © ${new Date().getFullYear()} JANAPAINT</span></div></footer>`;
 const jsonld = o => JSON.stringify(o).replace(/</g, "\\u003c");
 
 function page({ title, description, canonical, ogImage, ogType = "website", body, ld, extraHead = "" }) {
@@ -188,6 +203,15 @@ ${header}
 ${body}
 </main>
 ${footer}
+<div class="toast" id="toast" role="status"></div>
+<script>
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-hex]"); if (!b) return;
+  const hex = b.dataset.hex, t = document.getElementById("toast");
+  const show = m => { t.textContent = m; t.classList.add("show"); clearTimeout(window.__tt); window.__tt = setTimeout(() => t.classList.remove("show"), 1600); };
+  try { navigator.clipboard.writeText(hex).then(() => show(hex + " copiado"), () => show(hex)); } catch (err) { show(hex); }
+});
+</script>
 </body>
 </html>`;
 }
@@ -255,12 +279,13 @@ posts.forEach((p, i) => {
         { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE}/blog/` },
         { "@type": "ListItem", position: 3, name: p.title, item: url } ] } ] },
     body: `<article class="post-page">
-  ${p.image ? `<div class="wrap narrow"><figure class="post-hero">${imgTag(p.image, p.imageAlt || p.title, true)}${p.imageCaption ? `<figcaption>${esc(p.imageCaption)}</figcaption>` : ""}</figure></div>` : `<div class="post-cover">${p.colors.map(c => `<span style="background:${c}"></span>`).join("")}</div>`}
+  ${p.image ? "" : `<div class="post-cover">${p.colors.map(c => `<span style="background:${c}"></span>`).join("")}</div>`}
   <div class="wrap narrow">
     <nav class="crumbs" aria-label="Ruta"><a href="/">Inicio</a> / <a href="/blog/">Blog</a> / <span>${esc(p.tag)}</span></nav>
     <span class="tag">${esc(p.tag)}</span>
     <h1>${esc(p.title)}</h1>
     <p class="by"><time datetime="${p.date}">${fmtDate(p.date)}</time> · ${p.min} min de lectura</p>
+    ${p.image ? `<figure class="post-hero">${imgTag(p.image, p.imageAlt || p.title, true)}${p.imageCaption ? `<figcaption>${esc(p.imageCaption)}</figcaption>` : ""}</figure>` : ""}
     <div class="content">
 ${p.html}
     </div>
@@ -290,7 +315,7 @@ for (const f of fs.readdirSync(path.join(ROOT, "pages")).filter(f => f.endsWith(
     ld: { "@context": "https://schema.org", "@type": "WebPage", name: meta.title, url, inLanguage: "es" },
     body: `<article class="post-page"><div class="wrap narrow" style="padding-top:40px;padding-bottom:60px">
   <h1>${esc(meta.title)}</h1>
-  <p class="by">Última actualización: ${fmtDate(meta.updated || TODAY)}</p>
+  ${slug === "privacidad" ? `<p class="by">Última actualización: ${fmtDate(meta.updated || TODAY)}</p>` : ""}
   <div class="content">
 ${markdown(fill(m[2]))}
   </div>
