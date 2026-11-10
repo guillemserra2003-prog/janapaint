@@ -80,6 +80,24 @@
   .rgb{font-family:var(--mono);font-size:12.5px;color:var(--ink-3)}
   .actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:30px}
   .btn.gen-btn{height:56px;padding:0 40px;font-size:17px}
+  /* Tu paleta */
+  .mine{margin:30px auto 0;max-width:760px;border:1px solid var(--line);border-radius:18px;padding:16px 18px 18px;animation:mineIn .25s ease}
+  @keyframes mineIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .mine-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .mine-head strong{font-family:var(--head);font-weight:600;font-size:20px}
+  .mine-count{font-family:var(--mono);font-size:13px;color:var(--ink-2)}
+  .mine-help{font-size:13.5px;color:var(--ink-3);flex:1}
+  .mine-slots{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .slot-c{position:relative;height:64px;border-radius:12px;border:0;padding:0;width:100%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);animation:pop .2s ease}
+  @keyframes pop{from{transform:scale(.85)}to{transform:none}}
+  .slot-c .rm{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.9);display:grid;place-items:center;opacity:0;transition:opacity .15s}
+  .slot-c .rm svg{width:12px;height:12px}
+  .slot-c:hover .rm,.slot-c:focus .rm{opacity:1}
+  .slot-e{height:64px;border-radius:12px;border:1.5px dashed #d6d6d6;display:grid;place-items:center;color:#c4c4c4;font-size:22px}
+  .slot-hex{font-family:var(--mono);font-size:12.5px;text-align:center;margin-top:6px;color:var(--ink-2)}
+  .mine-acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+  .mine-acts .note-s{font-size:13px;color:var(--ink-3);margin-left:auto}
+  .tool.picked{background:#111;color:#fff}
   .hint{text-align:center;color:var(--ink-3);font-size:13.5px;margin-top:12px}
   kbd{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;color:var(--ink-2)}
 
@@ -196,10 +214,14 @@
     .sw-tools{opacity:1;bottom:auto;top:50%;transform:translateY(-50%);justify-content:flex-end;right:10px;left:auto}
     .tool{width:34px;height:34px}
     .sw-label{padding:0}
+    .slot-c,.slot-e{height:52px}
+    .slot-hex{font-size:10px}
+    .slot-c .rm{opacity:1}
+    .mine-acts .note-s{margin-left:0;width:100%}
     .hex{font-size:17px}
     .grid{grid-template-columns:1fr}
     .btn.gen-btn{width:100%}
-    .actions .btn:not(.gen-btn){flex:1}
+    .actions .btn:not(.gen-btn){flex:1;white-space:nowrap;padding:0 12px;font-size:14.5px}
     .hide-sm{display:none}
   }
   @media (prefers-reduced-motion: reduce){ *{transition:none!important;scroll-behavior:auto!important} }
@@ -245,7 +267,21 @@
           Descargar PDF
         </button>
       </div>
-      <p class="hint">Pulsa <kbd>espacio</kbd> para generar · haz clic en un código para copiarlo · usa el candado para fijar un color</p>
+      <div class="mine" id="mine" hidden aria-live="polite">
+        <div class="mine-head">
+          <strong>Tu paleta</strong><span class="mine-count" id="mineCount">0/5</span>
+          <span class="mine-help">Pulsa ♡ en cualquier color para añadirlo</span>
+          <button class="linkbtn" id="mineClear" type="button">Vaciar</button>
+        </div>
+        <div class="mine-slots" id="mineSlots"></div>
+        <div class="mine-acts">
+          <button class="btn small" id="mineUse" type="button">Ver en grande</button>
+          <button class="btn small" id="mineSave" type="button">Guardar</button>
+          <button class="btn small" id="minePdf" type="button">Descargar PDF</button>
+          <span class="note-s" id="mineNote"></span>
+        </div>
+      </div>
+      <p class="hint">Pulsa <kbd>espacio</kbd> para generar · ♡ para guardar un color en tu paleta · el candado fija un color · clic en el código para copiarlo</p>
     </div>
   </section>
 
@@ -494,7 +530,9 @@
     trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
     down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>',
     load:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h13"/><path d="M12 7l5 5-5 5"/><path d="M21 4v16"/></svg>',
-    x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+    x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    heart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-9.2-8.6C1.3 8.4 3.2 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.8 0 5.7 3.9 4.2 6.9C19 15.6 12 20 12 20z"/></svg>',
+    heartOn:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-9.2-8.6C1.3 8.4 3.2 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.8 0 5.7 3.9 4.2 6.9C19 15.6 12 20 12 20z"/></svg>'
   };
 
   /* ---------- Render palette ---------- */
@@ -504,6 +542,7 @@
       <div class="sw" data-i="${i}">
         <div class="sw-color">
           <div class="sw-tools">
+            <button class="tool" data-act="pick" aria-label="Añadir a tu paleta">${IC.heart}</button>
             <button class="tool" data-act="copy" aria-label="Copiar código">${IC.copy}</button>
             <button class="tool" data-act="lock" aria-label="Fijar color">${IC.unlock}</button>
           </div>
@@ -525,6 +564,9 @@
       n.classList.toggle("locked", on);
       lb.classList.toggle("on", on); lb.innerHTML = on ? IC.lock : IC.unlock;
       lb.setAttribute("aria-label", on ? "Desbloquear color" : "Fijar color");
+      const hb = n.querySelector('[data-act="pick"]'), picked = picks.includes(hex);
+      hb.classList.toggle("picked", picked); hb.innerHTML = picked ? IC.heartOn : IC.heart;
+      hb.setAttribute("aria-label", picked ? "Quitar de tu paleta" : "Añadir a tu paleta");
     });
     $("#meta").innerHTML = `<span class="chip">Armonía ${current.scheme.toLowerCase()}</span><span class="chip">${current.mood}</span>`;
   }
@@ -534,8 +576,62 @@
     const b = e.target.closest("[data-act]"); if(!b) return;
     const i = +b.closest(".sw").dataset.i;
     if(b.dataset.act === "copy") copy(current.colors[i]);
+    else if(b.dataset.act === "pick") togglePick(current.colors[i]);
     else { locks[i] = locks[i] ? null : current.colors[i]; renderPalette(); }
   });
+
+  /* ---------- Tu paleta: pick single colors from any palette ---------- */
+  let picks = [];
+  try{ const s = JSON.parse(localStorage.getItem("jp_picks") || "[]"); if(Array.isArray(s)) picks = s.filter(c => /^#[0-9A-F]{6}$/.test(c)).slice(0, MAX); }catch(e){}
+  let picksTimer;
+  function persistPicks(){
+    if(user && sb){
+      clearTimeout(picksTimer);
+      picksTimer = setTimeout(async () => {
+        const { error } = await sb.from("profiles").update({ picked_colors: picks }).eq("id", user.id);
+        if(error) toast("No se pudo guardar tu paleta en la cuenta");
+      }, 500);
+    } else { try{ localStorage.setItem("jp_picks", JSON.stringify(picks)); }catch(e){} }
+  }
+  function togglePick(hex){
+    if(picks.includes(hex)) picks = picks.filter(c => c !== hex);
+    else if(picks.length >= MAX){ toast("Tu paleta ya tiene 5 colores. Quita uno para añadir otro."); return; }
+    else { picks.push(hex); if(picks.length === 1) setTimeout(() => $("#mine").scrollIntoView({ behavior:"smooth", block:"nearest" }), 60); }
+    persistPicks(); renderPicks(); renderPalette();
+  }
+  function renderPicks(){
+    const box = $("#mine");
+    box.hidden = picks.length === 0;
+    $("#mineCount").textContent = `${picks.length}/${MAX}`;
+    $("#mineSlots").innerHTML = Array.from({ length: MAX }, (_, i) => {
+      const c = picks[i];
+      return c ? `<div><button class="slot-c" type="button" data-rm="${c}" style="background:${c}" title="Quitar ${c}" aria-label="Quitar ${c} de tu paleta"><span class="rm">${IC.x}</span></button><div class="slot-hex">${c}</div></div>`
+               : `<div><div class="slot-e" aria-hidden="true">+</div><div class="slot-hex">&nbsp;</div></div>`;
+    }).join("");
+    const full = picks.length === MAX;
+    ["#mineUse", "#mineSave", "#minePdf"].forEach(s => $(s).disabled = !full);
+    $("#mineNote").textContent = full ? "¡Lista! Guárdala o descárgala." : `Añade ${MAX - picks.length} color${MAX - picks.length === 1 ? "" : "es"} más para completarla.`;
+  }
+  const minePalette = () => ({ colors: [...picks], scheme: "Personalizada", mood: "Tu paleta" });
+  $("#mineSlots").addEventListener("click", e => { const b = e.target.closest("[data-rm]"); if(b) togglePick(b.dataset.rm); });
+  $("#mineClear").addEventListener("click", () => { picks = []; persistPicks(); renderPicks(); renderPalette(); toast("Tu paleta se ha vaciado"); });
+  $("#mineUse").addEventListener("click", () => { current = minePalette(); locks.fill(null); renderPalette(); $("#inicio").scrollIntoView({ behavior:"smooth" }); });
+  $("#minePdf").addEventListener("click", () => downloadPDF(minePalette()));
+  $("#mineSave").addEventListener("click", () => {
+    if(user){ savePalette(minePalette()); return; }
+    pendingSave = minePalette();
+    $("#spPrev").innerHTML = picks.map(c => `<span style="background:${c}"></span>`).join("");
+    open("#savePrompt");
+  });
+  async function loadPicks(){
+    if(!sb || !user) return;
+    const { data } = await sb.from("profiles").select("picked_colors").eq("id", user.id).maybeSingle();
+    const cloud = (data && Array.isArray(data.picked_colors)) ? data.picked_colors : [];
+    if(cloud.length) picks = cloud.slice(0, MAX);
+    else if(picks.length) persistPicks(); // first login on this device: move local picks into the account
+    try{ localStorage.removeItem("jp_picks"); }catch(e){}
+    renderPicks(); renderPalette();
+  }
 
   function copy(txt){
     const done = () => toast(`${txt} copiado`);
@@ -671,13 +767,13 @@
   function setUser(u){
     const was = user && user.id;
     user = u ? { id:u.id, email:u.email } : null;
-    if(!user){ cloudSaved = []; marketing = false; }
+    if(!user){ cloudSaved = []; marketing = false; if(was){ picks = []; renderPicks(); if(current) renderPalette(); } }
     renderUser(); renderSaved();
     return was !== (user && user.id);
   }
   // After an explicit sign-in: load account, move this visit's palettes into it, then the pending save.
   async function afterLogin(kind){
-    await loadCloud(); loadProfile();
+    await loadCloud(); loadProfile(); loadPicks();
     const guests = guestSaved.slice().reverse(); guestSaved = [];
     for(const p of guests) await savePalette(p, true);
     if(pendingSave){ const p = pendingSave; pendingSave = null; await savePalette(p); }
@@ -776,7 +872,7 @@
       if(event === "SIGNED_OUT"){ setUser(null); return; }
       if(session && session.user && (!user || user.id !== session.user.id)){
         setUser(session.user);
-        setTimeout(() => { loadCloud(); loadProfile(); }, 0); // never await Supabase inside this callback
+        setTimeout(() => { loadCloud(); loadProfile(); loadPicks(); }, 0); // never await Supabase inside this callback
       }
     });
   }
@@ -889,7 +985,7 @@
     return true;
   }
   window.addEventListener("hashchange", paletteFromHash);
-  buildSwatches(); if(!paletteFromHash()) generate(); renderSaved(); renderUser(); prepLogo();
+  buildSwatches(); if(!paletteFromHash()) generate(); renderPicks(); renderSaved(); renderUser(); prepLogo();
 })();
 </script>
 </body>
