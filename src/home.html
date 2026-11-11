@@ -65,6 +65,9 @@
   .gen{padding:28px 0 12px}
   .divider{border:0;height:1px;background:#e2e2e2;max-width:720px;margin:36px auto 8px}
   .meta{display:flex;justify-content:center;gap:8px;margin-bottom:16px;min-height:30px}
+  .chip-share{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:#fff;cursor:pointer}
+  .chip-share:hover{border-color:var(--ink);color:var(--ink)}
+  .chip-share svg{width:14px;height:14px}
   .chip{font-size:13px;font-weight:500;padding:5px 12px;border-radius:999px;background:var(--soft);color:var(--ink-2)}
   .palette{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
   .sw{display:flex;flex-direction:column;min-width:0}
@@ -278,6 +281,7 @@
           <button class="btn small" id="mineUse" type="button">Ver en grande</button>
           <button class="btn small" id="mineSave" type="button">Guardar</button>
           <button class="btn small" id="minePdf" type="button">Descargar PDF</button>
+          <button class="btn small" id="mineShare" type="button">Compartir</button>
           <span class="note-s" id="mineNote"></span>
         </div>
       </div>
@@ -531,6 +535,7 @@
     down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>',
     load:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h13"/><path d="M12 7l5 5-5 5"/><path d="M21 4v16"/></svg>',
     x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>',
     heart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-9.2-8.6C1.3 8.4 3.2 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.8 0 5.7 3.9 4.2 6.9C19 15.6 12 20 12 20z"/></svg>',
     heartOn:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-9.2-8.6C1.3 8.4 3.2 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.8 0 5.7 3.9 4.2 6.9C19 15.6 12 20 12 20z"/></svg>'
   };
@@ -568,7 +573,10 @@
       hb.classList.toggle("picked", picked); hb.innerHTML = picked ? IC.heartOn : IC.heart;
       hb.setAttribute("aria-label", picked ? "Quitar de tu paleta" : "Añadir a tu paleta");
     });
-    $("#meta").innerHTML = `<span class="chip">Armonía ${current.scheme.toLowerCase()}</span><span class="chip">${current.mood}</span>`;
+    const tags = current.scheme === "Compartida" ? `<span class="chip">Paleta compartida</span>`
+      : current.scheme === "Personalizada" ? `<span class="chip">Tu paleta</span>`
+      : `<span class="chip">Armonía ${current.scheme.toLowerCase()}</span><span class="chip">${current.mood}</span>`;
+    $("#meta").innerHTML = tags + `<button class="chip chip-share" type="button" data-share="current" aria-label="Compartir esta paleta">${IC.share}Compartir</button>`;
   }
   function generate(){ current = makePalette(locks); renderPalette(); }
 
@@ -609,7 +617,7 @@
                : `<div><div class="slot-e" aria-hidden="true">+</div><div class="slot-hex">&nbsp;</div></div>`;
     }).join("");
     const full = picks.length === MAX;
-    ["#mineUse", "#mineSave", "#minePdf"].forEach(s => $(s).disabled = !full);
+    ["#mineUse", "#mineSave", "#minePdf", "#mineShare"].forEach(s => $(s).disabled = !full);
     $("#mineNote").textContent = full ? "¡Lista! Guárdala o descárgala." : `Añade ${MAX - picks.length} color${MAX - picks.length === 1 ? "" : "es"} más para completarla.`;
   }
   const minePalette = () => ({ colors: [...picks], scheme: "Personalizada", mood: "Tu paleta" });
@@ -617,6 +625,7 @@
   $("#mineClear").addEventListener("click", () => { picks = []; persistPicks(); renderPicks(); renderPalette(); toast("Tu paleta se ha vaciado"); });
   $("#mineUse").addEventListener("click", () => { current = minePalette(); locks.fill(null); renderPalette(); $("#inicio").scrollIntoView({ behavior:"smooth" }); });
   $("#minePdf").addEventListener("click", () => downloadPDF(minePalette()));
+  $("#mineShare").addEventListener("click", () => sharePalette(picks));
   $("#mineSave").addEventListener("click", () => {
     if(user){ savePalette(minePalette()); return; }
     pendingSave = minePalette();
@@ -632,6 +641,22 @@
     try{ localStorage.removeItem("jp_picks"); }catch(e){}
     renderPicks(); renderPalette();
   }
+
+  /* ---------- Share a palette with a link ---------- */
+  const shareUrl = cols => `${location.origin}/#p=${cols.map(c => c.slice(1)).join("-")}`;
+  async function sharePalette(cols){
+    if(!cols || cols.length !== MAX) return;
+    const url = shareUrl(cols);
+    const mobile = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+    if(mobile && navigator.share){
+      try{ await navigator.share({ title: "Paleta de colores · JANAPAINT", text: `Mira esta paleta de colores: ${cols.join(" ")}`, url }); return; }
+      catch(e){ if(e && e.name === "AbortError") return; }
+    }
+    const ok = () => toast("Enlace copiado. Pégalo donde quieras");
+    try{ await navigator.clipboard.writeText(url); ok(); }
+    catch(e){ fallbackCopy(url) ? ok() : toast(url); }
+  }
+  $("#meta").addEventListener("click", e => { if(e.target.closest("[data-share]")) sharePalette(current.colors); });
 
   function copy(txt){
     const done = () => toast(`${txt} copiado`);
@@ -698,6 +723,7 @@
           <span>${new Date(p.date).toLocaleDateString("es-ES",{day:"numeric",month:"short"})}${p.scheme ? " · "+escH(p.scheme) : ""}</span>
           <div class="card-acts">
             <button class="ico" data-a="load" aria-label="Abrir en el generador" title="Abrir">${IC.load}</button>
+            <button class="ico" data-a="share" aria-label="Compartir" title="Compartir">${IC.share}</button>
             <button class="ico" data-a="pdf" aria-label="Descargar PDF" title="PDF">${IC.down}</button>
             <button class="ico" data-a="del" aria-label="Borrar" title="Borrar">${IC.trash}</button>
           </div>
@@ -718,6 +744,7 @@
       renderSaved(); toast("Paleta borrada");
     }
     else if(b.dataset.a === "pdf") downloadPDF(p);
+    else if(b.dataset.a === "share") sharePalette(p.colors);
     else { current = { colors:[...p.colors], scheme:p.scheme, mood:p.mood }; locks.fill(null); renderPalette(); $("#inicio").scrollIntoView(); }
   });
   const step = () => (track.querySelector(".card")?.offsetWidth || 250) + 16;
@@ -979,7 +1006,7 @@
   function paletteFromHash(){
     const m = (location.hash || "").match(/^#p=((?:[0-9a-fA-F]{6}-){4}[0-9a-fA-F]{6})$/);
     if(!m) return false;
-    current = { colors: m[1].split("-").map(c => "#" + c.toUpperCase()), scheme: "Compartida", mood: "Del blog" };
+    current = { colors: m[1].split("-").map(c => "#" + c.toUpperCase()), scheme: "Compartida", mood: "Compartida" };
     locks.fill(null); renderPalette();
     try{ history.replaceState(null, "", location.pathname); }catch(e){}
     return true;
