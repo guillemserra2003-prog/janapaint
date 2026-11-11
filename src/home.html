@@ -656,7 +656,8 @@
   }
 
   /* ---------- Share a palette with a link ---------- */
-  const shareUrl = cols => `${location.origin}/#p=${cols.map(c => c.slice(1)).join("-")}`;
+  // Always share the public domain, even from a preview (previews need a Vercel login).
+  const shareUrl = cols => `{{SITE}}/#p=${cols.map(c => c.slice(1)).join("-")}`;
   async function sharePalette(cols){
     if(!cols || cols.length !== MAX) return;
     const url = shareUrl(cols);
