@@ -40,6 +40,7 @@
   nav{display:flex;align-items:center;gap:6px}
   .navlink{padding:9px 14px;border-radius:999px;text-decoration:none;font-weight:500;color:var(--ink-2)}
   .navlink:hover{background:var(--soft);color:var(--ink)}
+  .show-sm{display:none}
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:46px;padding:0 20px;border-radius:999px;border:1.5px solid var(--ink);background:#fff;font-weight:700;font-size:15px;transition:transform .12s ease, background .15s ease}
   .btn:hover{background:var(--soft)}
   .btn:active{transform:scale(.97)}
@@ -226,6 +227,7 @@
     .btn.gen-btn{width:100%}
     .actions .btn:not(.gen-btn){flex:1;white-space:nowrap;padding:0 12px;font-size:14.5px}
     .hide-sm{display:none}
+    .show-sm{display:inline}
   }
   @media (prefers-reduced-motion: reduce){ *{transition:none!important;scroll-behavior:auto!important} }
 </style>
@@ -237,6 +239,7 @@
     <a class="brand" href="/" aria-label="JANAPAINT, inicio"><img src="/assets/logo.png" alt="JANAPAINT"></a>
     <nav>
       <a class="navlink hide-sm" href="#inicio">Generador</a>
+      <a class="navlink" href="/colores-de-una-imagen/"><span class="hide-sm">Colores de una foto</span><span class="show-sm">Foto</span></a>
       <a class="navlink hide-sm" href="#guardadas">Mis paletas</a>
       <a class="navlink" href="/blog/">Blog</a>
       <div class="user" id="userBox"></div>
@@ -632,6 +635,16 @@
     $("#spPrev").innerHTML = picks.map(c => `<span style="background:${c}"></span>`).join("");
     open("#savePrompt");
   });
+  // Colours added from the "Colores de una foto" page wait in a queue until the generator opens.
+  function mergeQueue(){
+    let q = []; try{ q = JSON.parse(localStorage.getItem("jp_picks_add") || "[]"); }catch(e){}
+    if(!Array.isArray(q) || !q.length) return;
+    let added = 0, full = false;
+    for(const c of q){ if(!/^#[0-9A-F]{6}$/.test(c) || picks.includes(c)) continue; if(picks.length >= MAX){ full = true; break; } picks.push(c); added++; }
+    try{ localStorage.removeItem("jp_picks_add"); }catch(e){}
+    if(added){ persistPicks(); renderPicks(); if(current) renderPalette(); toast(full ? "Algunos colores no cabían: tu paleta ya tiene 5" : `${added} color${added > 1 ? "es" : ""} de tu foto añadido${added > 1 ? "s" : ""} a «Tu paleta»`); }
+    else if(full) toast("Tu paleta ya tiene 5 colores");
+  }
   async function loadPicks(){
     if(!sb || !user) return;
     const { data } = await sb.from("profiles").select("picked_colors").eq("id", user.id).maybeSingle();
@@ -639,7 +652,7 @@
     if(cloud.length) picks = cloud.slice(0, MAX);
     else if(picks.length) persistPicks(); // first login on this device: move local picks into the account
     try{ localStorage.removeItem("jp_picks"); }catch(e){}
-    renderPicks(); renderPalette();
+    renderPicks(); renderPalette(); mergeQueue();
   }
 
   /* ---------- Share a palette with a link ---------- */
@@ -895,6 +908,7 @@
   // Session restore, email-confirmation links, password-reset links.
   if(sb){
     sb.auth.onAuthStateChange((event, session) => {
+      if(event === "INITIAL_SESSION" && !session) setTimeout(mergeQueue, 0);
       if(event === "PASSWORD_RECOVERY"){ setTimeout(() => open("#resetDlg"), 0); }
       if(event === "SIGNED_OUT"){ setUser(null); return; }
       if(session && session.user && (!user || user.id !== session.user.id)){
@@ -1013,6 +1027,8 @@
   }
   window.addEventListener("hashchange", paletteFromHash);
   buildSwatches(); if(!paletteFromHash()) generate(); renderPicks(); renderSaved(); renderUser(); prepLogo();
+  // Guests: merged once we know there is no session. Signed-in users: after their saved colours load (loadPicks).
+  if(!sb) mergeQueue();
 })();
 </script>
 </body>

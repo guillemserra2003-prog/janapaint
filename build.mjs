@@ -172,7 +172,7 @@ const featured = p => p ? `<a class="featured" href="/blog/${p.slug}/">
       </a>` : `<p class="by">Pronto publicaremos el primer artículo.</p>`;
 const header = `<header><div class="wrap bar">
   <a class="brand" href="/" aria-label="JANAPAINT, inicio"><img src="/assets/logo.png" alt="JANAPAINT" width="640" height="291"></a>
-  <nav><a class="navlink" href="/">Generador</a><a class="navlink" href="/blog/">Blog</a></nav>
+  <nav><a class="navlink" href="/">Generador</a><a class="navlink" href="/colores-de-una-imagen/"><span class="nav-long">Colores de una foto</span><span class="nav-short">Foto</span></a><a class="navlink" href="/blog/">Blog</a></nav>
 </div></header>`;
 const footer = `<footer><div class="wrap"><img src="/assets/logo.png" alt="JANAPAINT" width="640" height="291"><span><a href="/colores-corporativos/">Colores corporativos</a> · <a href="/blog/">Blog</a> · <a href="/privacidad/">Privacidad</a> · <a href="/cookies/">Cookies</a> · © ${new Date().getFullYear()} JANAPAINT</span></div></footer>`;
 // Google shows ~60 characters of a title: add the brand only when it fits.
@@ -322,6 +322,19 @@ for (const f of fs.readdirSync(path.join(ROOT, "pages")).filter(f => f.endsWith(
 ${markdown(fill(m[2]))}
   </div>
 </div></article>`,
+  }));
+}
+
+// Tool: colours from an image
+{
+  const url = `${SITE}/colores-de-una-imagen/`;
+  PAGES.push({ url, lastmod: TODAY });
+  write(path.join(DIST, "colores-de-una-imagen", "index.html"), page({
+    title: "Sacar los colores de una imagen y su código HEX | JANAPAINT",
+    description: "Sube una foto o una captura y descubre sus colores con su código HEX y RGB. Toca cualquier punto para saber su color exacto. Gratis y sin subir tu imagen a ningún sitio.",
+    canonical: url, ogImage: `${SITE}/assets/og.png`,
+    ld: { "@context": "https://schema.org", "@type": "WebApplication", name: "Sacar los colores de una imagen · JANAPAINT", url, applicationCategory: "DesignApplication", operatingSystem: "Web", inLanguage: "es", offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" } },
+    body: fs.readFileSync(path.join(ROOT, "src/imagen-body.html"), "utf8"),
   }));
 }
 

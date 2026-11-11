@@ -1,0 +1,273 @@
+<style>
+  .tool-wrap{max-width:980px;margin:0 auto;padding:44px 24px 20px}
+  .tool-wrap h1{font-size:clamp(32px,5vw,52px);line-height:1.08;text-align:center}
+  .tool-lede{color:var(--ink-2);font-size:18px;text-align:center;max-width:600px;margin:12px auto 28px}
+  .drop{border:2px dashed #d6d6d6;border-radius:20px;padding:44px 20px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s}
+  .drop:hover,.drop.over{border-color:var(--ink);background:var(--soft)}
+  .drop svg{width:42px;height:42px;color:var(--ink-2)}
+  .drop strong{display:block;font-family:var(--head);font-weight:600;font-size:22px;margin:10px 0 6px}
+  .drop p{margin:0;color:var(--ink-2)}
+  .drop .keys{margin-top:10px;font-size:13.5px;color:var(--ink-3)}
+  kbd{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;color:var(--ink-2)}
+  .privacy-note{display:flex;gap:8px;justify-content:center;align-items:center;font-size:13.5px;color:var(--ink-3);margin-top:14px}
+  .privacy-note svg{width:15px;height:15px}
+  .work{display:none;margin-top:8px}
+  .work.on{display:block}
+  .work.noimg .stage,.work.noimg .hint-s,.work.noimg .tools-row,.work.noimg .res-title,.work.noimg #found,.work.noimg .res-acts{display:none}
+  .stage{position:relative;border-radius:16px;overflow:hidden;background:var(--soft);border:1px solid var(--line);display:flex;justify-content:center}
+  .stage canvas{display:block;max-width:100%;max-height:62vh;cursor:crosshair;touch-action:none}
+  .loupe{position:absolute;width:112px;height:112px;border-radius:50%;border:3px solid #fff;box-shadow:0 6px 20px rgba(0,0,0,.3);pointer-events:none;display:none;overflow:hidden;background:#fff}
+  .loupe canvas{width:100%;height:100%;image-rendering:pixelated}
+  .loupe .lhex{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);font-family:var(--mono);font-size:11px;background:rgba(17,17,17,.8);color:#fff;padding:2px 6px;border-radius:6px}
+  .tools-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:14px 0 4px}
+  .btn.small{height:38px;padding:0 16px;font-size:14px}
+  .btn[disabled]{opacity:.5;pointer-events:none}
+  .hint-s{text-align:center;font-size:13.5px;color:var(--ink-3);margin:6px 0 0}
+  .res-title{font-family:var(--head);font-weight:600;font-size:22px;margin:30px 0 12px;display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .res-title small{font-family:var(--body);font-weight:400;font-size:14px;color:var(--ink-3)}
+  .found{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .fc{display:flex;flex-direction:column;min-width:0}
+  .fc-color{position:relative;height:150px;border-radius:14px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+  .fc-tools{position:absolute;right:8px;bottom:8px;display:flex;gap:6px}
+  .tool{width:36px;height:36px;border-radius:50%;border:0;display:grid;place-items:center;background:rgba(255,255,255,.9);color:#111;box-shadow:0 2px 8px rgba(0,0,0,.12);cursor:pointer}
+  .tool svg{width:17px;height:17px}
+  .tool.picked{background:#111;color:#fff}
+  .fc .hexb{font-family:var(--mono);font-size:17px;background:none;border:0;padding:8px 2px 0;text-align:left;cursor:pointer;color:var(--ink)}
+  .fc .hexb:hover{text-decoration:underline;text-underline-offset:3px}
+  .fc .rgb{font-family:var(--mono);font-size:12px;color:var(--ink-3);padding:0 2px}
+  .sel{display:none;align-items:center;gap:16px;border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:16px}
+  .sel.on{display:flex}
+  .sel-sw{width:88px;height:88px;border-radius:12px;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+  .sel-info{flex:1;min-width:0}
+  .sel-info .lbl{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+  .sel-info .hexb{font-family:var(--mono);font-size:24px;background:none;border:0;padding:2px 0;cursor:pointer;color:var(--ink)}
+  .sel-info .codes-s{font-family:var(--mono);font-size:12.5px;color:var(--ink-3)}
+  .sel .tool{box-shadow:none;border:1.5px solid var(--line)}
+  .res-acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .seo{max-width:740px;margin:40px auto 60px;padding:0 24px}
+  .seo h2{font-size:26px;margin:34px 0 10px}
+  .seo h3{font-size:19px;margin:22px 0 6px}
+  .seo p,.seo li{color:#222;font-size:17px;line-height:1.7}
+  .seo ol{padding-left:22px}
+  @media (max-width:760px){.found{grid-template-columns:repeat(5,1fr);gap:6px}.fc-color{height:90px}.fc-tools{right:4px;bottom:4px;flex-direction:column;gap:4px}.tool{width:30px;height:30px}.tool svg{width:14px;height:14px}.fc .hexb{font-size:11px}.fc .rgb{display:none}.tool-wrap{padding:30px 16px 10px}.drop{padding:34px 16px}}
+</style>
+
+<section class="tool-wrap">
+  <h1>Saca los colores de una imagen</h1>
+  <p class="tool-lede">Sube una foto o una captura de pantalla y descubre sus colores con sus códigos HEX y RGB. Toca cualquier punto para saber su color exacto.</p>
+
+  <div class="drop" id="drop" role="button" tabindex="0" aria-label="Elegir una imagen">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>
+    <strong>Elige, arrastra o pega una imagen</strong>
+    <p>Desde el móvil también puedes hacer una foto.</p>
+    <p class="keys">¿Tienes una captura? Pégala con <kbd>Ctrl</kbd> + <kbd>V</kbd> (o <kbd>⌘</kbd> + <kbd>V</kbd> en Mac)</p>
+    <input type="file" id="file" accept="image/*" hidden>
+  </div>
+  <div class="tools-row" id="eyeRow" hidden><button class="btn small" id="eyedrop0" type="button">O elige un color de tu pantalla con el cuentagotas</button></div>
+  <p class="privacy-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Tu imagen no se sube a ningún sitio: se analiza solo en tu navegador.</p>
+
+  <div class="work" id="work">
+    <div class="stage" id="stage">
+      <canvas id="view" aria-label="Tu imagen. Haz clic en un punto para ver su color"></canvas>
+      <div class="loupe" id="loupe"><canvas id="lcan" width="15" height="15"></canvas><span class="lhex" id="lhex"></span></div>
+    </div>
+    <p class="hint-s">Haz clic (o toca) en cualquier punto de la imagen para saber su color exacto.</p>
+    <div class="tools-row">
+      <button class="btn small" id="another" type="button">Usar otra imagen</button>
+      <button class="btn small" id="eyedrop" type="button" hidden>Cuentagotas de pantalla</button>
+    </div>
+
+    <div class="sel" id="sel" aria-live="polite">
+      <div class="sel-sw" id="selSw"></div>
+      <div class="sel-info">
+        <div class="lbl">Color seleccionado</div>
+        <button class="hexb" id="selHex" type="button" title="Copiar"></button>
+        <div class="codes-s" id="selCodes"></div>
+      </div>
+      <button class="tool" id="selPick" type="button" aria-label="Añadir a tu paleta"></button>
+    </div>
+
+    <div class="res-title">Colores principales <small>Pulsa un código para copiarlo · ♡ para añadirlo a tu paleta</small></div>
+    <div class="found" id="found"></div>
+    <div class="res-acts">
+      <a class="btn primary" id="openGen" href="/">Abrir en el generador</a>
+    </div>
+  </div>
+</section>
+
+<section class="seo">
+  <h2>Cómo saber el código de un color de una foto</h2>
+  <ol>
+    <li><strong>Sube la imagen.</strong> Puede ser una foto de tu móvil, una imagen descargada o una captura de pantalla de una web, un vídeo o una app.</li>
+    <li><strong>Mira los colores principales.</strong> JANAPAINT analiza la imagen y te muestra sus cinco colores más representativos, con su código HEX y RGB.</li>
+    <li><strong>Toca el punto exacto.</strong> Si buscas un color concreto, haz clic sobre él en la imagen. La lupa te ayuda a apuntar con precisión.</li>
+    <li><strong>Úsalo.</strong> Copia el código, añádelo a tu paleta con el corazón o abre los colores en el generador para guardarlos, compartirlos o descargarlos en PDF.</li>
+  </ol>
+
+  <h2>Preguntas frecuentes</h2>
+  <h3>¿El color es exacto?</h3>
+  <p>En una captura de pantalla, sí: el código es el del píxel que tocas. En una foto real, como una flor o una pared, el color depende de la luz, de la cámara y del móvil, así que es una aproximación muy buena, pero puede variar un poco respecto al objeto real.</p>
+  <h3>¿Se guarda o se sube mi imagen?</h3>
+  <p>No. La imagen se analiza dentro de tu propio navegador y nunca sale de tu dispositivo. Ni nosotros ni nadie puede verla.</p>
+  <h3>¿Puedo sacar el color de una web o de cualquier cosa de mi pantalla?</h3>
+  <p>Sí. Haz una captura de pantalla y pégala aquí con Ctrl + V. En navegadores compatibles, como Chrome en ordenador, también verás el botón «Cuentagotas de pantalla», que te deja elegir un color de cualquier parte de tu pantalla.</p>
+  <h3>¿Qué es un código HEX?</h3>
+  <p>Es la forma más habitual de escribir un color en diseño y en la web: una almohadilla seguida de seis caracteres, como #E8A33D. Los dos primeros indican la cantidad de rojo, los dos siguientes la de verde y los dos últimos la de azul.</p>
+</section>
+
+<script>
+(() => {
+  "use strict";
+  const $ = s => document.querySelector(s);
+  const MAX = 5;
+  const toHex = (r, g, b) => "#" + [r, g, b].map(x => Math.round(x).toString(16).padStart(2, "0")).join("").toUpperCase();
+  const fromHex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  function hsl(r, g, b){ r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, s = 0; const l = (mx + mn) / 2;
+    if(mx !== mn){ const d = mx - mn; s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn); h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; }
+    return [Math.round(h), Math.round(s * 100), Math.round(l * 100)]; }
+  const dist = (a, b) => { const rm = (a[0] + b[0]) / 2; return Math.sqrt((2 + rm / 256) * (a[0] - b[0]) ** 2 + 4 * (a[1] - b[1]) ** 2 + (2 + (255 - rm) / 256) * (a[2] - b[2]) ** 2); };
+  let tt; const toast = m => { const t = $("#toast"); if(!t) return; t.textContent = m; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 1800); };
+
+  const IC = {
+    heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-9.2-8.6C1.3 8.4 3.2 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.8 0 5.7 3.9 4.2 6.9C19 15.6 12 20 12 20z"/></svg>',
+    heartOn: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-9.2-8.6C1.3 8.4 3.2 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.8 0 5.7 3.9 4.2 6.9C19 15.6 12 20 12 20z"/></svg>'
+  };
+
+  /* ---- "Tu paleta": colours chosen here are queued and added in the generator ---- */
+  const getQ = () => { try{ const q = JSON.parse(localStorage.getItem("jp_picks_add") || "[]"); return Array.isArray(q) ? q : []; }catch(e){ return []; } };
+  const setQ = q => { try{ localStorage.setItem("jp_picks_add", JSON.stringify(q.slice(-MAX))); }catch(e){} };
+  function togglePick(hex){
+    let q = getQ();
+    if(q.includes(hex)){ q = q.filter(c => c !== hex); setQ(q); toast("Quitado de tu paleta"); }
+    else { q.push(hex); setQ(q); toast("Añadido a «Tu paleta». Lo verás en el generador"); }
+    renderHearts();
+  }
+  function renderHearts(){
+    const q = getQ();
+    document.querySelectorAll("[data-pick]").forEach(b => { const on = q.includes(b.dataset.pick); b.classList.toggle("picked", on); b.innerHTML = on ? IC.heartOn : IC.heart; b.setAttribute("aria-label", on ? "Quitar de tu paleta" : "Añadir a tu paleta"); });
+  }
+
+  /* ---- Load image: click, drag & drop, paste ---- */
+  const drop = $("#drop"), file = $("#file"), view = $("#view"), vctx = view.getContext("2d", { willReadFrequently: true });
+  const full = document.createElement("canvas"), fctx = full.getContext("2d", { willReadFrequently: true });
+  drop.addEventListener("click", () => file.click());
+  drop.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); file.click(); } });
+  file.addEventListener("change", () => { if(file.files[0]) load(file.files[0]); file.value = ""; });
+  ["dragenter", "dragover"].forEach(ev => document.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach(ev => document.addEventListener(ev, e => { e.preventDefault(); if(ev === "dragleave" && e.relatedTarget) return; drop.classList.remove("over"); }));
+  document.addEventListener("drop", e => { const f = [...(e.dataTransfer?.files || [])].find(f => f.type.startsWith("image/")); if(f) load(f); });
+  document.addEventListener("paste", e => { const it = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith("image/")); if(it){ e.preventDefault(); load(it.getAsFile()); } });
+  $("#another").addEventListener("click", () => file.click());
+
+  function load(f){
+    if(!f || !f.type.startsWith("image/")){ toast("Ese archivo no es una imagen"); return; }
+    const url = URL.createObjectURL(f), img = new Image();
+    img.onload = () => {
+      const cap = 3000, k = Math.min(1, cap / Math.max(img.naturalWidth, img.naturalHeight));
+      full.width = Math.max(1, Math.round(img.naturalWidth * k)); full.height = Math.max(1, Math.round(img.naturalHeight * k));
+      fctx.drawImage(img, 0, 0, full.width, full.height);
+      const vk = Math.min(1, 1600 / Math.max(full.width, full.height));
+      view.width = Math.round(full.width * vk); view.height = Math.round(full.height * vk);
+      vctx.imageSmoothingQuality = "high"; vctx.drawImage(full, 0, 0, view.width, view.height);
+      URL.revokeObjectURL(url);
+      drop.style.display = "none"; $("#eyeRow").hidden = true; $("#work").classList.remove("noimg"); $("#work").classList.add("on"); $("#sel").classList.remove("on");
+      extract();
+      $("#work").scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); toast("No se ha podido abrir esa imagen. Prueba con JPG o PNG"); };
+    img.src = url;
+  }
+
+  /* ---- Main colours: k-means on a small copy of the image ---- */
+  function extract(){
+    const s = document.createElement("canvas"), k = Math.min(1, 140 / Math.max(full.width, full.height));
+    s.width = Math.max(1, Math.round(full.width * k)); s.height = Math.max(1, Math.round(full.height * k));
+    const sc = s.getContext("2d"); sc.drawImage(full, 0, 0, s.width, s.height);
+    const d = sc.getImageData(0, 0, s.width, s.height).data, px = [];
+    for(let i = 0; i < d.length; i += 4) if(d[i + 3] > 200) px.push([d[i], d[i + 1], d[i + 2]]);
+    if(!px.length) return;
+    // k-means++ init (deterministic seed so the same image gives the same result)
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const K = Math.min(10, px.length), C = [px[Math.floor(rnd() * px.length)].slice()];
+    while(C.length < K){
+      const dd = px.map(p => Math.min(...C.map(c => (p[0]-c[0])**2 + (p[1]-c[1])**2 + (p[2]-c[2])**2)));
+      const tot = dd.reduce((a, b) => a + b, 0); if(!tot) break;
+      let r = rnd() * tot, i = 0; while(r > dd[i] && i < dd.length - 1){ r -= dd[i]; i++; }
+      C.push(px[i].slice());
+    }
+    let cnt = new Array(C.length).fill(0);
+    for(let it = 0; it < 14; it++){
+      const sum = C.map(() => [0, 0, 0]); cnt = new Array(C.length).fill(0);
+      for(const p of px){ let bi = 0, bd = Infinity; for(let j = 0; j < C.length; j++){ const c = C[j], v = (p[0]-c[0])**2 + (p[1]-c[1])**2 + (p[2]-c[2])**2; if(v < bd){ bd = v; bi = j; } } sum[bi][0] += p[0]; sum[bi][1] += p[1]; sum[bi][2] += p[2]; cnt[bi]++; }
+      C.forEach((c, j) => { if(cnt[j]) C[j] = sum[j].map(v => v / cnt[j]); });
+    }
+    const cl = C.map((c, j) => ({ c, n: cnt[j] })).filter(o => o.n).sort((a, b) => b.n - a.n);
+    const pick = [];
+    for(const th of [60, 35, 15, 0]){ for(const o of cl){ if(pick.length >= MAX) break; if(pick.includes(o)) continue; if(pick.every(p => dist(p.c, o.c) > th)) pick.push(o); } if(pick.length >= MAX) break; }
+    const cols = pick.map(o => toHex(...o.c));
+    while(cols.length < MAX && cols.length) cols.push(cols[cols.length - 1]);
+    renderFound(cols);
+  }
+  function renderFound(cols){
+    $("#found").innerHTML = cols.map(h => { const [r, g, b] = fromHex(h); return `
+      <div class="fc"><div class="fc-color" style="background:${h}"><div class="fc-tools"><button class="tool" type="button" data-pick="${h}"></button></div></div>
+      <button class="hexb" type="button" data-hex="${h}" title="Copiar ${h}">${h}</button><div class="rgb">RGB ${r}, ${g}, ${b}</div></div>`; }).join("");
+    $("#openGen").href = "/#p=" + cols.map(c => c.slice(1)).join("-");
+    renderHearts();
+  }
+  document.addEventListener("click", e => { const b = e.target.closest("[data-pick]"); if(b) togglePick(b.dataset.pick); });
+
+  /* ---- Pick one point with a magnifier ---- */
+  const loupe = $("#loupe"), lcan = $("#lcan"), lctx = lcan.getContext("2d"), stage = $("#stage");
+  lctx.imageSmoothingEnabled = false;
+  function at(ev){
+    const r = view.getBoundingClientRect(), t = ev.touches ? ev.touches[0] : ev;
+    const x = (t.clientX - r.left) / r.width, y = (t.clientY - r.top) / r.height;
+    if(x < 0 || y < 0 || x > 1 || y > 1) return null;
+    return { fx: Math.floor(x * full.width), fy: Math.floor(y * full.height), cx: t.clientX - stage.getBoundingClientRect().left, cy: t.clientY - stage.getBoundingClientRect().top };
+  }
+  function colorAt(fx, fy){
+    const x0 = Math.max(0, fx - 1), y0 = Math.max(0, fy - 1), w = Math.min(3, full.width - x0), h = Math.min(3, full.height - y0);
+    const d = fctx.getImageData(x0, y0, w, h).data; let r = 0, g = 0, b = 0, n = 0;
+    for(let i = 0; i < d.length; i += 4){ r += d[i]; g += d[i + 1]; b += d[i + 2]; n++; }
+    return toHex(r / n, g / n, b / n);
+  }
+  function showLoupe(p){
+    if(!p){ loupe.style.display = "none"; return; }
+    lctx.clearRect(0, 0, 15, 15);
+    lctx.drawImage(full, p.fx - 7, p.fy - 7, 15, 15, 0, 0, 15, 15);
+    lctx.strokeStyle = "rgba(255,255,255,.95)"; lctx.lineWidth = .15; lctx.strokeRect(7, 7, 1, 1);
+    const hex = colorAt(p.fx, p.fy); $("#lhex").textContent = hex;
+    loupe.style.display = "block";
+    const sw = stage.clientWidth, L = 112, off = 70;
+    let lx = p.cx + 24, ly = p.cy - L - 16;
+    if(lx + L > sw) lx = p.cx - L - 24; if(ly < 0) ly = p.cy + 24;
+    loupe.style.left = lx + "px"; loupe.style.top = ly + "px";
+  }
+  function select(hex){
+    const [r, g, b] = fromHex(hex), [h, s, l] = hsl(r, g, b);
+    $("#selSw").style.background = hex; $("#selHex").textContent = hex; $("#selHex").dataset.hex = hex;
+    $("#selCodes").textContent = `RGB ${r}, ${g}, ${b} · HSL ${h}, ${s}%, ${l}%`;
+    $("#selPick").dataset.pick = hex; $("#sel").classList.add("on"); renderHearts();
+  }
+  view.addEventListener("mousemove", e => showLoupe(at(e)));
+  view.addEventListener("mouseleave", () => showLoupe(null));
+  view.addEventListener("click", e => { const p = at(e); if(p) select(colorAt(p.fx, p.fy)); });
+  view.addEventListener("touchstart", e => { const p = at(e); showLoupe(p); if(p) select(colorAt(p.fx, p.fy)); }, { passive: true });
+  view.addEventListener("touchmove", e => { e.preventDefault(); const p = at(e); showLoupe(p); if(p) select(colorAt(p.fx, p.fy)); }, { passive: false });
+  view.addEventListener("touchend", () => showLoupe(null));
+
+  /* ---- Screen eyedropper (Chrome/Edge on desktop) ---- */
+  if("EyeDropper" in window){
+    const run = async () => {
+      try{
+        const r = await new window.EyeDropper().open();
+        const w = $("#work"); if(!w.classList.contains("on")){ w.classList.add("on", "noimg"); }
+        select(r.sRGBHex.toUpperCase()); $("#sel").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }catch(e){}
+    };
+    $("#eyedrop").hidden = false; $("#eyedrop").addEventListener("click", run);
+    $("#eyeRow").hidden = false; $("#eyedrop0").addEventListener("click", run);
+  }
+})();
+</script>

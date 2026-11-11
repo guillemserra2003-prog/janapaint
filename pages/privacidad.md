@@ -1,7 +1,7 @@
 ---
 title: Política de privacidad
 description: Qué datos guarda JANAPAINT cuando creas una cuenta, para qué los usa y cómo puedes borrarlos.
-updated: 2026-11-10
+updated: 2026-11-11
 ---
 
 En JANAPAINT queremos que sepas exactamente qué datos guardamos y para qué. Puedes usar el generador de paletas **sin crear ninguna cuenta**: en ese caso no guardamos ningún dato personal tuyo.
@@ -22,6 +22,8 @@ Solo si decides crear una cuenta guardamos:
 - Si has elegido **recibir novedades por email** y cuándo lo elegiste.
 
 Si guardas paletas sin cuenta, se quedan solo en tu navegador mientras dura la visita y desaparecen al cerrar la página.
+
+Si usas la herramienta de **colores de una foto**, la imagen se analiza dentro de tu navegador: **no se sube ni se guarda en ningún servidor**.
 
 ## Para qué los usamos
 

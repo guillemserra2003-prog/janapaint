@@ -1,7 +1,7 @@
 ---
 title: Política de cookies
 description: Qué cookies y qué almacenamiento usa JANAPAINT en tu navegador y para qué. Sin cookies de publicidad ni de seguimiento.
-updated: 2026-11-10
+updated: 2026-11-11
 ---
 
 En JANAPAINT queremos ser claros: **ahora mismo no usamos cookies de publicidad, de seguimiento ni de análisis**. Por eso no te mostramos ningún aviso para aceptar cookies. Aun así, te explicamos qué guardamos en tu navegador y por qué.
@@ -16,6 +16,7 @@ Las cookies son pequeños archivos que una web guarda en tu navegador para recor
 
 - **Sesión de usuario:** si creas una cuenta e inicias sesión, guardamos en el almacenamiento local de tu navegador un identificador de sesión para que no tengas que volver a entrar cada vez. Lo gestiona nuestro proveedor de cuentas, **Supabase**. Se borra al cerrar sesión.
 - **Paletas sin cuenta:** si guardas paletas sin haber iniciado sesión, se quedan en la memoria de la página mientras dura tu visita y desaparecen al cerrarla.
+- **«Tu paleta» sin cuenta:** los colores que eliges con el corazón ♡ (también desde la página de colores de una foto) se guardan en el almacenamiento local de tu navegador para que no los pierdas al cerrar la página. Puedes borrarlos con el botón «Vaciar».
 
 Este almacenamiento es **imprescindible** para que funcionen las funciones que tú pides, como mantener tu sesión iniciada. Por eso la ley no exige pedirte permiso para usarlo, pero sí informarte, que es lo que hacemos aquí.
 
