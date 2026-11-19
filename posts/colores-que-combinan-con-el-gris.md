@@ -133,4 +133,4 @@ Depende de su matiz. Los grises con un toque azulado son fríos; los que tienen 
 
 ## Encuentra tu combinación con gris
 
-Abre cualquiera de estas paletas en el [generador de JANAPAINT](/), bloquea tu gris favorito y pulsa la barra espaciadora para descubrir nuevas combinaciones a su alrededor. Tienes también las guías de [qué colores combinan con el azul](/blog/colores-que-combinan-con-el-azul/), [con el verde](/blog/colores-que-combinan-con-el-verde/) y [con el rosa](/blog/colores-que-combinan-con-el-rosa/).
+Abre cualquiera de estas paletas en el [generador de JANAPAINT](/), bloquea tu gris favorito y pulsa la barra espaciadora para descubrir nuevas combinaciones a su alrededor. Tienes también las guías de qué colores combinan con el [azul](/blog/colores-que-combinan-con-el-azul/), el [verde](/blog/colores-que-combinan-con-el-verde/), el [rosa](/blog/colores-que-combinan-con-el-rosa/), el [beige](/blog/colores-que-combinan-con-el-beige/) y el [negro](/blog/colores-que-combinan-con-el-negro/).

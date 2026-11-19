@@ -141,4 +141,4 @@ Sí, y muy bien. El azul con marrón o camel es una combinación cálida y elega
 
 Abre cualquiera de estas paletas en el [generador de JANAPAINT](/), bloquea tu azul favorito y pulsa la barra espaciadora para descubrir nuevas combinaciones a su alrededor. Cuando encuentres la tuya, guárdala y descárgala en PDF.
 
-Si te interesan otros colores, tienes también las guías de [qué colores combinan con el verde](/blog/colores-que-combinan-con-el-verde/), [con el rosa](/blog/colores-que-combinan-con-el-rosa/) y [con el gris](/blog/colores-que-combinan-con-el-gris/).
+Tienes también las guías de qué colores combinan con el [verde](/blog/colores-que-combinan-con-el-verde/), el [rosa](/blog/colores-que-combinan-con-el-rosa/), el [gris](/blog/colores-que-combinan-con-el-gris/), el [beige](/blog/colores-que-combinan-con-el-beige/) y el [negro](/blog/colores-que-combinan-con-el-negro/).

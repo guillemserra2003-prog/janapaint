@@ -142,4 +142,4 @@ Sí, sobre todo los verdes apagados como el salvia o el oliva. Es una combinaci�
 
 ## Encuentra tu combinación con verde
 
-Abre cualquiera de estas paletas en el [generador de JANAPAINT](/), bloquea tu verde favorito y pulsa la barra espaciadora para descubrir nuevas combinaciones a su alrededor. Si te interesan otros colores, tienes también las guías de [qué colores combinan con el azul](/blog/colores-que-combinan-con-el-azul/), [con el rosa](/blog/colores-que-combinan-con-el-rosa/) y [con el gris](/blog/colores-que-combinan-con-el-gris/).
+Abre cualquiera de estas paletas en el [generador de JANAPAINT](/), bloquea tu verde favorito y pulsa la barra espaciadora para descubrir nuevas combinaciones a su alrededor. Tienes también las guías de qué colores combinan con el [azul](/blog/colores-que-combinan-con-el-azul/), el [rosa](/blog/colores-que-combinan-con-el-rosa/), el [gris](/blog/colores-que-combinan-con-el-gris/), el [beige](/blog/colores-que-combinan-con-el-beige/) y el [negro](/blog/colores-que-combinan-con-el-negro/).
