@@ -144,7 +144,7 @@ Los que tienen buen contraste entre sí y transmiten lo que quieres. Tienes una 
 
 ### ¿Qué colores combinan con todo?
 
-Los neutros: blanco, negro, gris, beige y azul marino. Tienes guías de qué colores combinan con el [azul](/blog/colores-que-combinan-con-el-azul/), el [verde](/blog/colores-que-combinan-con-el-verde/), el [rosa](/blog/colores-que-combinan-con-el-rosa/), el [gris](/blog/colores-que-combinan-con-el-gris/), el [beige](/blog/colores-que-combinan-con-el-beige/) y el [negro](/blog/colores-que-combinan-con-el-negro/).
+Los neutros: blanco, negro, gris, beige y azul marino. Tienes guías de qué colores combinan con el [azul](/blog/colores-que-combinan-con-el-azul/), el [verde](/blog/colores-que-combinan-con-el-verde/), el [rosa](/blog/colores-que-combinan-con-el-rosa/), el [gris](/blog/colores-que-combinan-con-el-gris/), el [beige](/blog/colores-que-combinan-con-el-beige/), el [negro](/blog/colores-que-combinan-con-el-negro/), el [marrón](/blog/colores-que-combinan-con-el-marron/) y el [amarillo](/blog/colores-que-combinan-con-el-amarillo/).
 
 ## Encuentra tu pareja de colores
 
