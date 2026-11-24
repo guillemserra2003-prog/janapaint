@@ -24,3 +24,5 @@ Y luego está el cortejo. La cola del pavo real o los plumajes brillantes de muc
 ## Lo que podemos aprender
 
 Las tres estrategias tienen su versión en el diseño: el contraste fuerte para avisar o destacar (un botón, una alerta), la paleta discreta para integrarse (una marca elegante y silenciosa) y el color llamativo para seducir (una campaña, un lanzamiento). La próxima vez que elijas colores, pregúntate: ¿quiero avisar, integrarme o enamorar?
+
+Si te gustan estas historias, no te pierdas la del [«sudor rojo» del hipopótamo](/blog/hipopotamo-sudor-rojo-protector-solar/), un protector solar natural que cambia de color, ni la de los [animales de colores más llamativos](/blog/animales-de-colores-llamativos/).

@@ -1,7 +1,7 @@
 ---
 title: Cómo saber el código de un color de una foto, una web o tu pantalla
-seoTitle: Cómo saber el código de un color de una foto o web
-description: Formas fáciles y gratis de averiguar el código HEX o RGB de cualquier color: de una foto, de una captura, de una web o de cualquier cosa en tu pantalla, en ordenador y móvil.
+seoTitle: Cómo saber el código de un color: HEX y RGB gratis
+description: Averigua en segundos y gratis el código HEX o RGB de cualquier color: de una foto, una captura, una web o tu pantalla, en ordenador y en móvil. Paso a paso.
 date: 2026-11-11
 tag: Herramientas
 colors: ["#F6B26B","#FCEFD9","#C46A5A","#9C4F57","#4F6D7A"]

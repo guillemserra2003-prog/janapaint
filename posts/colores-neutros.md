@@ -20,7 +20,7 @@ Los colores neutros son colores con **poca o ninguna saturación**, es decir, si
 
 En sentido estricto, los únicos neutros «puros» son el **blanco, el negro y los grises**, porque no tienen ningún tono. Pero en diseño, decoración y moda se consideran neutros también otros colores muy apagados o muy oscuros que funcionan de la misma forma:
 
-- **Blanco y blancos rotos**: crema, marfil, hueso. Tienes la guía completa del [blanco roto](/blog/blanco-roto/).
+- **Blanco y blancos rotos**: crema, marfil, hueso. Tienes la guía completa del [blanco roto](/blog/blanco-roto/), y si quieres saber el código exacto de un color que ves, te lo explicamos en [cómo saber el código de un color](/blog/como-saber-el-codigo-de-un-color/).
 - **Beiges y arenas**: incluido el greige, una mezcla de gris y beige.
 - **Grises**: del gris perla al antracita.
 - **Topo y marrones apagados**: cálidos y discretos.

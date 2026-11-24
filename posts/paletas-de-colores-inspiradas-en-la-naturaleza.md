@@ -19,3 +19,5 @@ En un paisaje, los colores suelen estar relacionados: comparten luz, se degradan
 ## Ejercicio
 
 Haz una foto de un paisaje que te guste, elige cinco colores de ella y compáralos con lo que genera [JANAPAINT](/). Te sorprenderá lo a menudo que una paleta aleatoria pero armónica te recuerda a un lugar concreto. Y si un día una te lleva directamente a esa montaña o a esa playa, guárdala: probablemente sea la tuya.
+
+Si quieres saber el código exacto de un color de tu foto, te explicamos todas las formas en [cómo saber el código de un color](/blog/como-saber-el-codigo-de-un-color/). Y si te gustan los animales, tienes la curiosa historia del [«sudor rojo» del hipopótamo](/blog/hipopotamo-sudor-rojo-protector-solar/).
