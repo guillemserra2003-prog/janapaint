@@ -84,3 +84,9 @@ footer img{height:34px;width:auto}
 .toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:999px;font-weight:500;font-size:14.5px;opacity:0;pointer-events:none;transition:all .22s ease;z-index:80}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 @media (max-width:640px){.pal-row{height:96px}.pal-sw{font-size:10.5px}.pal-grid{grid-template-columns:1fr}}
+
+.by a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.author-box{margin:40px 0 8px;padding:18px 20px;border:1px solid var(--line,#e6e6e6);border-radius:14px;font-size:15px;line-height:1.55}
+.author-box p{margin:0}
+.author-box .author-name{font-weight:700;margin-bottom:6px}
+.author-box a{color:inherit}

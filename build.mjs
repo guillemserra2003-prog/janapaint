@@ -174,7 +174,7 @@ const header = `<header><div class="wrap bar">
   <a class="brand" href="/" aria-label="JANAPAINT, inicio"><img src="/assets/logo.png" alt="JANAPAINT" width="640" height="291"></a>
   <nav><a class="navlink" href="/">Generador</a><a class="navlink" href="/colores-de-una-imagen/"><span class="nav-long">Colores de una foto</span><span class="nav-short">Foto</span></a><a class="navlink" href="/blog/">Blog</a></nav>
 </div></header>`;
-const footer = `<footer><div class="wrap"><img src="/assets/logo.png" alt="JANAPAINT" width="640" height="291"><span><a href="/colores-corporativos/">Colores corporativos</a> · <a href="/blog/">Blog</a> · <a href="/privacidad/">Privacidad</a> · <a href="/cookies/">Cookies</a> · © ${new Date().getFullYear()} JANAPAINT</span></div></footer>`;
+const footer = `<footer><div class="wrap"><img src="/assets/logo.png" alt="JANAPAINT" width="640" height="291"><span><a href="/colores-corporativos/">Colores corporativos</a> · <a href="/blog/">Blog</a> · <a href="/sobre/">Sobre JANAPAINT</a> · <a href="/privacidad/">Privacidad</a> · <a href="/cookies/">Cookies</a> · © ${new Date().getFullYear()} JANAPAINT</span></div></footer>`;
 // Google shows ~60 characters of a title: add the brand only when it fits.
 const pageTitle = (t) => (t.length + 12 <= 64 ? `${t} | JANAPAINT` : t);
 const jsonld = o => JSON.stringify(o).replace(/</g, "\\u003c");
@@ -264,6 +264,7 @@ posts.forEach((p, i) => {
   if (!p.image) write(path.join(DIST, `blog/og/${p.slug}.png`), palettePNG(p.colors));
   const og = p.image ? SITE + p.image : `${SITE}/blog/og/${p.slug}.png`;
   const related = posts.filter(q => q !== p).sort((a, b) => (b.tag === p.tag) - (a.tag === p.tag)).slice(0, 3);
+  const AUTH = p.author && CFG.authors ? CFG.authors[p.author] : null;
   write(path.join(DIST, `blog/${p.slug}/index.html`), page({
     title: pageTitle(p.seoTitle || p.title),
     description: p.description,
@@ -274,7 +275,7 @@ posts.forEach((p, i) => {
     ld: { "@context": "https://schema.org", "@graph": [
       { "@type": "BlogPosting", headline: p.title, description: p.description, datePublished: p.date, dateModified: p.updated || p.date,
         inLanguage: "es", wordCount: p.words, articleSection: p.tag, image: og, mainEntityOfPage: url,
-        author: { "@type": "Organization", name: CFG.author || "JANAPAINT", url: SITE + "/" },
+        author: AUTH ? { "@type": "Person", name: AUTH.name, url: SITE + AUTH.url, description: AUTH.bio } : { "@type": "Organization", name: CFG.author || "JANAPAINT", url: SITE + "/" },
         publisher: { "@type": "Organization", name: "JANAPAINT", logo: { "@type": "ImageObject", url: `${SITE}/assets/logo.png` } } },
       { "@type": "BreadcrumbList", itemListElement: [
         { "@type": "ListItem", position: 1, name: "Inicio", item: SITE + "/" },
@@ -286,11 +287,12 @@ posts.forEach((p, i) => {
     <nav class="crumbs" aria-label="Ruta"><a href="/">Inicio</a> / <a href="/blog/">Blog</a> / <span>${esc(p.tag)}</span></nav>
     <span class="tag">${esc(p.tag)}</span>
     <h1>${esc(p.title)}</h1>
-    <p class="by"><time datetime="${p.date}">${fmtDate(p.date)}</time> · ${p.min} min de lectura</p>
+    <p class="by">${AUTH ? `Por <a href="${AUTH.url}">${esc(AUTH.name)}</a> · ` : ""}<time datetime="${p.date}">${fmtDate(p.date)}</time> · ${p.min} min de lectura</p>
     ${p.image ? `<figure class="post-hero">${imgTag(p.image, p.imageAlt || p.title, true)}${p.imageCaption ? `<figcaption>${esc(p.imageCaption)}</figcaption>` : ""}</figure>` : ""}
     <div class="content">
 ${p.html}
     </div>
+    ${AUTH ? `<aside class="author-box"><p class="author-name">Escrito por <a href="${AUTH.url}">${esc(AUTH.name)}</a></p><p>${esc(AUTH.bio)}</p></aside>` : ""}
     <div class="palette-box">
       <h2>La paleta de este artículo</h2>
       <div class="codes">${p.colors.map(c => `<span><i style="background:${c}"></i>${c}</span>`).join("")}</div>
