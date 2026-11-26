@@ -1,5 +1,6 @@
 ---
 title: Sobre JANAPAINT
+seoTitle: Quién está detrás de JANAPAINT
 description: Quién hay detrás de JANAPAINT, por qué nació y qué puedes encontrar en esta web de paletas de colores.
 ---
 

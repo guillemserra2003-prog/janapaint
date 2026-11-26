@@ -314,15 +314,22 @@ for (const f of fs.readdirSync(path.join(ROOT, "pages")).filter(f => f.endsWith(
   const fill = s => s.replace(/\{\{(\w+)\}\}/g, (x, k) => CFG[k] || `[${k} pendiente]`);
   const url = `${SITE}/${slug}/`;
   PAGES.push({ url, lastmod: meta.updated || TODAY });
+  const PA = meta.author && CFG.authors ? CFG.authors[meta.author] : null;
+  const pImg = meta.image ? SITE + meta.image : `${SITE}/assets/og.png`;
   write(path.join(DIST, slug, "index.html"), page({
-    title: pageTitle(meta.seoTitle || meta.title), description: meta.description, canonical: url, ogImage: `${SITE}/assets/og.png`,
-    ld: { "@context": "https://schema.org", "@type": "WebPage", name: meta.title, url, inLanguage: "es" },
+    title: pageTitle(meta.seoTitle || meta.title), description: meta.description, canonical: url, ogImage: pImg,
+    ld: PA ? { "@context": "https://schema.org", "@type": "Article", headline: meta.title, description: meta.description, url, inLanguage: "es", image: pImg,
+               dateModified: meta.updated || TODAY, author: { "@type": "Person", name: PA.name, url: SITE + PA.url, description: PA.bio },
+               publisher: { "@type": "Organization", name: "JANAPAINT", logo: { "@type": "ImageObject", url: `${SITE}/assets/logo.png` } } }
+          : { "@context": "https://schema.org", "@type": "WebPage", name: meta.title, url, inLanguage: "es" },
     body: `<article class="post-page"><div class="wrap narrow" style="padding-top:40px;padding-bottom:60px">
   <h1>${esc(meta.title)}</h1>
-  ${["privacidad", "cookies"].includes(slug) ? `<p class="by">Última actualización: ${fmtDate(meta.updated || TODAY)}</p>` : ""}
+  ${PA ? `<p class="by">Por <a href="${PA.url}">${esc(PA.name)}</a> · Actualizado el <time datetime="${meta.updated || TODAY}">${fmtDate(meta.updated || TODAY)}</time></p>` : ["privacidad", "cookies"].includes(slug) ? `<p class="by">Última actualización: ${fmtDate(meta.updated || TODAY)}</p>` : ""}
+  ${meta.image ? `<figure class="post-hero">${imgTag(meta.image, meta.imageAlt || meta.title, true)}${meta.imageCaption ? `<figcaption>${esc(meta.imageCaption)}</figcaption>` : ""}</figure>` : ""}
   <div class="content">
 ${markdown(fill(m[2]))}
   </div>
+  ${PA ? `<aside class="author-box"><p class="author-name">Escrito por <a href="${PA.url}">${esc(PA.name)}</a></p><p>${esc(PA.bio)}</p></aside>` : ""}
 </div></article>`,
   }));
 }

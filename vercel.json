@@ -2,5 +2,17 @@
   "buildCommand": "node build.mjs",
   "outputDirectory": "dist",
   "cleanUrls": true,
-  "trailingSlash": true
+  "trailingSlash": true,
+  "redirects": [
+    {
+      "source": "/blog/colores-corporativos-empresa-coherencia",
+      "destination": "/colores-corporativos/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/colores-corporativos-empresa-coherencia/",
+      "destination": "/colores-corporativos/",
+      "permanent": true
+    }
+  ]
 }

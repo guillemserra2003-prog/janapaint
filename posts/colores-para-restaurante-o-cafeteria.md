@@ -57,7 +57,7 @@ Un consejo: antes de pintar, prueba el color en la pared y míralo **con la ilum
 
 ### 1. Parte de tu identidad
 
-Si ya tienes logo o colores corporativos, la decoración debería ir en la misma línea. La coherencia hace que tu marca se reconozca: en la fachada, en la carta, en las redes y en los uniformes. Te contamos por qué en [color y empresa](/blog/colores-corporativos-empresa-coherencia/).
+Si ya tienes logo o colores corporativos, la decoración debería ir en la misma línea. La coherencia hace que tu marca se reconozca: en la fachada, en la carta, en las redes y en los uniformes. Te contamos por qué en nuestra guía de [colores corporativos](/colores-corporativos/).
 
 ### 2. Elige una base neutra
 
